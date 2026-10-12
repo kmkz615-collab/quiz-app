@@ -793,6 +793,14 @@ dl.gl{display:block;margin:0;padding:0 12px 12px}
 dl.gl dt{font-weight:900;font-size:14px;margin:0;padding-top:10px;writing-mode:horizontal-tb}
 dl.gl dd{margin:2px 0 0;font-size:13px;color:var(--muted);line-height:1.6;padding-bottom:10px;border-bottom:2px dashed #e4d8cc}
 dl.gl dd:last-child{border-bottom:0;padding-bottom:0}
+/* まとめ表：1行ずつ縦に並べる */
+.tcards{display:flex;flex-direction:column}
+.tcard{padding:8px 0;border-bottom:2px dashed #e4d8cc}
+.tcard:last-child{border-bottom:0}
+.tcard b{display:block;font-size:14px;line-height:1.45}
+.tcard p{margin:3px 0 0 10px;font-size:13px;line-height:1.55;color:var(--muted)}
+.tcard p span{display:inline-block;min-width:4.2em;font-weight:700;color:var(--mark)}
+.tcard p span::after{content:"："}
 </style>
 
 <div id="shell">
@@ -3246,7 +3254,7 @@ const GLOSS=[
 ];
 
 /* ---------- 人事労務 まとめノート ---------- */
-const TB=(head,rows)=>`<div class="tw"><table class="nt"><thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+const TB=(head,rows)=>`<div class="tcards">${rows.map(r=>`<div class="tcard"><b>${r[0]}</b>${r.slice(1).map((c,j)=>r.length>2?`<p><span>${head[j+1]}</span>${c}</p>`:`<p>${c}</p>`).join("")}</div>`).join("")}</div>`;
 const UL=a=>`<ul class="nl">${a.map(x=>`<li>${x}</li>`).join("")}</ul>`;
 const TOPICS=[
 {id:"jikan",c:"勤怠・労働時間",t:"労働時間・休憩・休日の基本",k:["法定労働時間","1日の","1週","休憩","法定休日","特例","週44","4週4日","労働時間にあたる","手待ち","着替え","労働時間に含まれない"],h:()=>TB(["項目","ルール"],[["法定労働時間","1日8時間・週40時間（特例事業場は週44時間）"],["休憩","6時間超→45分以上／8時間超→60分以上（途中・一斉・自由利用）"],["法定休日","毎週1日以上（または4週4日）"],["労働時間の判断","会社の指揮命令下にあるか（着替え・手待ち・義務的な研修は労働時間）"]])+UL(["所定労働時間は会社が決める時間。法定を超えた分だけが「時間外労働」","土曜など所定休日の出勤は、週40時間を超えれば時間外労働（25%）"])},
