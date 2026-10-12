@@ -5471,29 +5471,36 @@ const FB_CFG={apiKey:"AIzaSyBSqMKgMgj56QUi3s6Oyiry7NYeHsrdOGE",authDomain:"quiz-
 const MP_URL="https://kmkz615-collab.github.io/quiz-app/";
 const MP_MOCK=/[?&#]mpmock=1/.test(location.search+location.hash)||!!window.__MPMOCK;
 const mpAvail=()=>MP_MOCK||!!window.__PWA||/github\.io$/.test(location.hostname);
-const MP_ANS=10,MP_Q=20,MP_STEAL=8,MP_REV=8,MP_LOST=25000,MP_STALE=2*3600e3,MP_WIN=30000,MP_JOIN=5000;
+const MP_ANS=10,MP_Q=20,MP_STEAL=8,MP_REV=2.5,MP_LOST=15000,MP_STALE=2*3600e3,MP_WIN=30000,MP_JOIN=5000;
 const isDel=v=>v&&typeof v==="object"&&v.__del===1;
+const FB_DB_URL="https://quiz-app-24d28-default-rtdb.asia-southeast1.firebasedatabase.app";
 let MPB=null,MPBP=null;
 function mpBackend(){if(MPB)return Promise.resolve(MPB);if(!MPBP)MPBP=(MP_MOCK?Promise.resolve(mpMock()):mpFire()).then(b=>MPB=b).catch(e=>{MPBP=null;throw e});return MPBP}
+const mpClone=v=>v==null?null:JSON.parse(JSON.stringify(v));
+/* {"pl.uid.sc":1} の形の変更を、今のデータに当てはめる */
+function mpApply(d,p){d=mpClone(d)||{};for(const k in p){const ks=k.split(".");let o=d;for(let j=0;j<ks.length-1;j++){if(!o[ks[j]]||typeof o[ks[j]]!=="object")o[ks[j]]={};o=o[ks[j]]}const l=ks[ks.length-1];if(isDel(p[k])||p[k]==null)delete o[l];else o[l]=mpClone(p[k])}return d}
+/* Realtime Database（ゲーム向けの速い通信） */
 async function mpFire(){const V="https://www.gstatic.com/firebasejs/10.12.4/";
-  const [A,U,F]=await Promise.all([import(V+"firebase-app.js"),import(V+"firebase-auth.js"),import(V+"firebase-firestore.js")]);
-  const app=A.initializeApp(FB_CFG),auth=U.getAuth(app),db=F.getFirestore(app);
-  const uid=auth.currentUser?auth.currentUser.uid:(await U.signInAnonymously(auth)).user.uid;
-  const ref=c=>F.doc(db,"rooms",c),fix=p=>{const o={};for(const k in p)o[k]=isDel(p[k])?F.deleteField():p[k];return o};
+  const [A,U,D]=await Promise.all([import(V+"firebase-app.js"),import(V+"firebase-auth.js"),import(V+"firebase-database.js")]);
+  const app=A.initializeApp(FB_CFG),auth=U.getAuth(app),db=D.getDatabase(app,FB_DB_URL);
+  const uid=(await U.signInAnonymously(auth)).user.uid;
+  const R=c=>D.ref(db,"rooms/"+c),live={};
+  /* 書きかえの前に最新の中身を手元に置いておく（判定を正しくするため） */
+  const keep=c=>live[c]||(live[c]=new Promise(res=>{let f=true;const un=D.onValue(R(c),()=>{if(f){f=false;res(un)}},()=>{if(f){f=false;res(null)}})}));
   return{uid,
-    get:async c=>{const s=await F.getDoc(ref(c));return s.exists()?s.data():null},
-    upd:(c,p)=>F.updateDoc(ref(c),fix(p)),
-    sub:(c,cb)=>F.onSnapshot(ref(c),s=>cb(s.exists()?s.data():null),e=>cb(undefined,e)),
-    tx:(c,fn)=>F.runTransaction(db,async t=>{const s=await t.get(ref(c)),p=fn(s.exists()?s.data():null);if(!p)return false;if(p.__set)t.set(ref(c),p.__set);else t.update(ref(c),fix(p));return true})}}
-/* 動作確認用（同じブラウザのタブどうしでつながる） */
+    upd:(c,p)=>{const o={};for(const k in p)o[k.split(".").join("/")]=isDel(p[k])?null:mpClone(p[k]);return D.update(R(c),o)},
+    sub:(c,cb)=>D.onValue(R(c),s=>cb(s.val()),e=>cb(undefined,e)),
+    tx:async(c,fn)=>{await keep(c);const r=await D.runTransaction(R(c),cur=>{const p=fn(cur);if(!p)return;return p.__set?mpClone(p.__set):mpApply(cur,p)});return r.committed},
+    done:c=>{const q=live[c];delete live[c];if(q)q.then(un=>{try{un&&un()}catch(e){}})}}}
+/* 動作確認用（同じブラウザのタブどうしでつながる。空の項目が消える性質もまねる） */
 function mpMock(){let uid=sessionStorage.getItem("mpuid");if(!uid){uid="u"+Math.random().toString(36).slice(2,8);sessionStorage.setItem("mpuid",uid)}
   const K=c=>"mpmock:"+c,rd=c=>{try{return JSON.parse(localStorage.getItem(K(c)))}catch(e){return null}},subs={};
-  const fire=c=>(subs[c]||[]).forEach(f=>f(rd(c))),wr=(c,d)=>{localStorage.setItem(K(c),JSON.stringify(d));setTimeout(()=>fire(c),0)};
-  const apply=(d,p)=>{d=JSON.parse(JSON.stringify(d));for(const k in p){const ks=k.split(".");let o=d;for(let j=0;j<ks.length-1;j++){o[ks[j]]=o[ks[j]]||{};o=o[ks[j]]}const l=ks[ks.length-1];if(isDel(p[k]))delete o[l];else o[l]=JSON.parse(JSON.stringify(p[k]))}return d};
+  const strip=d=>JSON.parse(JSON.stringify(d,(k,v)=>v===null||(Array.isArray(v)&&!v.length)||(v&&typeof v==="object"&&!Array.isArray(v)&&!Object.keys(v).length)?undefined:v)||"null");
+  const fire=c=>(subs[c]||[]).forEach(f=>f(rd(c))),wr=(c,d)=>{localStorage.setItem(K(c),JSON.stringify(strip(d)));setTimeout(()=>fire(c),0)};
   addEventListener("storage",e=>{if(e.key&&e.key.startsWith("mpmock:"))fire(e.key.slice(7))});
-  return{uid,get:async c=>rd(c),upd:async(c,p)=>{const d=rd(c);if(!d)throw new Error("no doc");wr(c,apply(d,p))},
+  return{uid,upd:async(c,p)=>{const d=rd(c);if(!d)throw new Error("no doc");wr(c,mpApply(d,p))},
     sub:(c,cb)=>{(subs[c]=subs[c]||[]).push(cb);setTimeout(()=>cb(rd(c)),0);return()=>{subs[c]=(subs[c]||[]).filter(f=>f!==cb)}},
-    tx:async(c,fn)=>{const d=rd(c),p=fn(d);if(!p)return false;wr(c,p.__set?p.__set:apply(d,p));return true}}}
+    tx:async(c,fn)=>{await new Promise(r=>setTimeout(r,window.__MPLAG||0));const d=rd(c),p=fn(d);if(!p)return false;wr(c,p.__set?p.__set:mpApply(d,p));return true},done:()=>{}}}
 
 /* ---------- 共通 ---------- */
 let MP=null;
@@ -5542,22 +5549,22 @@ async function mpMake(co,n){const B=await mpBackend(),qs=mpQs(co,n);
   for(let t=0;t<8;t++){const code=String(1000+Math.floor(Math.random()*9000));
     const ok=await B.tx(code,d=>{if(d&&d.st!=="end"&&Date.now()-(d.ts||0)<MP_STALE&&mpAct(d).length)return null;
       return{__set:{host:B.uid,st:"wait",co,n,qs,k:0,ph:"q",bz:null,lk:[],wp:[],res:null,frz:null,an:0,qt:MP_Q,ts:Date.now(),pl:{[B.uid]:mpMe()}}}});
-    if(ok)return code}return null}
+    if(ok)return code;B.done(code)}return null}
 async function mpJoin(code){const B=await mpBackend();let why="その番号の部屋は見つかりません";
   const ok=await B.tx(code,d=>{if(!d||Date.now()-(d.ts||0)>MP_STALE){why="その番号の部屋は見つかりません";return null}
     const me=d.pl&&d.pl[B.uid];if(me&&!me.out)return{["pl."+B.uid+".hb"]:Date.now(),["pl."+B.uid+".nm"]:(S.nick||"プレイヤー").slice(0,8)};
     if(d.st!=="wait"){why="この部屋はもう対戦が始まっています";return null}
     if(mpAct(d).length>=4){why="この部屋は満員です（4人まで）";return null}
     return{["pl."+B.uid]:mpMe()}});
-  return ok?true:why}
+  if(!ok)B.done(code);return ok?true:why}
 
 /* ---------- 部屋に入ってから ---------- */
 function mpEnter(code){mpQuit();const B=MPB;
-  MP={code,me:B.uid,d:null,lastSt:null,phKey:"",t0:performance.now(),seen:{},hbv:{},frzId:null,frzUntil:0,frzBy:null,L:{gone:{},sh:{},msg:{}},ab:[],sending:false,rew:false,hostBusy:"",rk:"",autoSent:"",watchAt:0};
+  MP={code,me:B.uid,d:null,lastSt:null,phKey:"",t0:performance.now(),seen:{},hbv:{},frzId:null,frzUntil:0,frzBy:null,L:{gone:{},sh:{},msg:{}},ab:[],sending:false,opt:null,pick:null,rew:false,hostBusy:"",rk:"",autoSent:"",watchAt:0};
   MP.un=B.sub(code,mpSnap);
-  MP.hb=setInterval(()=>{if(MP&&MP.d)B.upd(code,{["pl."+MP.me+".hb"]:Date.now()}).catch(()=>{})},8000);
+  MP.hb=setInterval(()=>{if(MP&&MP.d)B.upd(code,{["pl."+MP.me+".hb"]:Date.now()}).catch(()=>{})},5000);
   MP.tk=setInterval(mpTick,100)}
-function mpQuit(){if(!MP)return;const m=MP;MP=null;clearInterval(m.hb);clearInterval(m.tk);try{m.un&&m.un()}catch(e){}
+function mpQuit(){if(!MP)return;const m=MP;MP=null;clearInterval(m.hb);clearInterval(m.tk);try{m.un&&m.un()}catch(e){}try{MPB&&MPB.done(m.code)}catch(e){}
   const d=m.d;if(d&&d.pl&&d.pl[m.me]&&MPB){const p=d.st==="play"?{["pl."+m.me+".out"]:true}:{["pl."+m.me]:{__del:1}};MPB.upd(m.code,p).catch(()=>{})}}
 function mpSnap(d,err){if(!MP)return;
   if(err){const s=document.getElementById("mpst")||document.getElementById("mp-msg");if(s)s.textContent="通信が不安定です…";return}
@@ -5566,15 +5573,17 @@ function mpSnap(d,err){if(!MP)return;
   const now=Date.now();Object.keys(d.pl).forEach(u=>{if(MP.hbv[u]!==d.pl[u].hb||MP.seen[u]==null){MP.hbv[u]=d.pl[u].hb;MP.seen[u]=now}});
   const prev=MP.d;MP.d=d;
   const key=`${d.st}|${d.k}|${d.ph}|${d.an}`;if(key!==MP.phKey){MP.phKey=key;MP.t0=performance.now();MP.sending=false;
+    const o=MP.opt;if(o){if(d.st==="play"&&d.k===o.k&&d.ph==="ans"&&d.bz===MP.me){MP.t0=o.t0;MP.opt=null}else if(d.st!=="play"||d.k!==o.k||d.ph!=="q"||d.bz){if(d.k===o.k&&d.bz&&d.bz!==MP.me)MP.L.msg[o.k]=`${mpNm(d,d.bz)}さんのほうが早かった！`;MP.opt=null}}
+    if(MP.pick&&(d.st!=="play"||d.k!==MP.pick.k||d.ph==="rev"))MP.pick=null;
     if(prev&&d.st==="play"){if(d.ph==="ans"&&d.bz&&d.bz!==MP.me&&prev.bz!==d.bz)se("buzz");
-      if(d.ph==="rev"&&prev.ph!=="rev"&&d.res){if(d.res.u===MP.me)se("ok");else se("ng")}}}
+      if(d.ph==="rev"&&prev.ph!=="rev"&&d.res&&d.res.u){if(d.res.u===MP.me)se("ok");else se("ng")}else if(d.ph==="rev"&&prev.ph!=="rev")se("ng")}}
   if(d.frz&&d.frz.id!==MP.frzId){MP.frzId=d.frz.id;if(d.frz.by!==MP.me&&d.frz.k===d.k&&d.st==="play"){MP.frzUntil=performance.now()+d.frz.s*1000;MP.frzBy=d.frz.by;se("ng")}}
   if(d.st==="play"&&MP.lastSt!=="play"){if(S.course!==d.co){S.course=d.co;save()}MP.ab=supList().map(x=>({...x,used:false}));MP.L={gone:{},sh:{},msg:{}};MP.rew=false;MP.frzUntil=0;bgm("boss")}
   if(d.st==="end"&&!MP.rew){MP.rew=true;if(MP.lastSt==="play")mpReward(d)}
   if(d.st==="wait"&&MP.lastSt!=="wait"){MP.rew=false;bgm("room")}
   MP.lastSt=d.st;mpRender()}
 function mpRender(force){if(!MP||!MP.d)return;const d=MP.d;
-  const strip=JSON.stringify(d,(k,v)=>k==="hb"?undefined:v)+"|"+JSON.stringify(MP.L)+"|"+MP.ab.map(a=>a.used?1:0).join("")+(MP.endMsg||"");
+  const strip=JSON.stringify(d,(k,v)=>k==="hb"?undefined:v)+"|"+JSON.stringify(MP.L)+"|"+JSON.stringify([MP.opt&&MP.opt.k,MP.pick,MP.sending])+MP.ab.map(a=>a.used?1:0).join("")+(MP.endMsg||"");
   if(!force&&strip===MP.rk)return;MP.rk=strip;const st=$.scrollTop;
   if(d.st==="wait")mpWaitView(d);else if(d.st==="play")mpPlayView(d);else mpEndView(d);
   $.scrollTop=st;mpTick()}
@@ -5604,12 +5613,12 @@ function mpStart(){const me=MP.me;return MPB.tx(MP.code,d=>{if(!d||d.st!=="wait"
   Object.keys(d.pl).forEach(u=>{if(d.pl[u].out)p["pl."+u]={__del:1};else p["pl."+u+".sc"]=0});return p})}
 
 /* 対戦中 */
-function mpPlayView(d){const q=d.qs[d.k],K=d.k,me=MP.me,mine=d.ph==="ans"&&d.bz===me,gone=MP.L.gone[K]||[],wp=d.wp||[];setTab("quiz","quiz");
-  const optCls=n=>{let c="opt";const w=wp.filter(x=>x.p===n);if(d.ph==="rev"&&q.o[n]===q.a)c+=" right";else if(w.length)c+=" wrong";if(gone.includes(n)&&!(d.ph==="rev"&&q.o[n]===q.a))c+=" gone";return c};
-  const optDis=n=>!mine||MP.sending||gone.includes(n)||wp.some(x=>x.p===n);
+function mpPlayView(d){const q=d.qs[d.k],K=d.k,me=MP.me,mine=mpMine(d),pk=MP.pick&&MP.pick.k===K?MP.pick:null,gone=MP.L.gone[K]||[],wp=d.wp||[];setTab("quiz","quiz");
+  const optCls=n=>{let c="opt";const w=wp.filter(x=>x.p===n);if((d.ph==="rev"||(pk&&pk.ok&&pk.p===n))&&q.o[n]===q.a)c+=" right";else if(w.length||(pk&&!pk.ok&&pk.p===n))c+=" wrong";if(gone.includes(n)&&!(d.ph==="rev"&&q.o[n]===q.a))c+=" gone";return c};
+  const optDis=n=>!mine||MP.sending||!!pk||gone.includes(n)||wp.some(x=>x.p===n);
   const grid=q.o.every(t=>String(t).length<=12);
   let after="";if(d.ph==="rev"){const r=d.res||{},ok=r.u===me;
-    after=`<div class="slip"><b class="${ok?"ok":"ng"}">${r.u?(ok?"正解！ ＋1点":`${esc(mpNm(d,r.u))}さんが正解`):"だれも正解できなかった"}</b><p>正解は「${esc(q.a)}」。${esc(q.e)}</p></div><p class="mpnext" id="mp-next"></p>`}
+    after=`<div class="slip"><b class="${ok?"ok":"ng"}">${r.u?(ok?"正解！ ＋1点":`${esc(mpNm(d,r.u))}さんが正解`):"だれも正解できなかった"}</b><p>正解は「${esc(q.a)}」</p></div><p class="mpnext" id="mp-next"></p>`}
   const ab=MP.ab.length&&d.ph!=="rev"?`<div class="rvab">${MP.ab.map((a,j)=>`<button class="abb ${a.used?"used":""}" data-ab="${j}" ${a.used?"disabled":""}><b>${SUP[a.g].n}${a.full?"":"（半分）"}</b><small>${a.used?"使用済み":mpSupD(a.g,a.full)}</small></button>`).join("")}</div>`:"";
   $.innerHTML=`<div class="strip"><button class="qx" id="mp-x" aria-label="対戦をやめる">${XSVG}</button><span>みんなで対戦　第${K+1}問 / ${d.qs.length}</span></div>
   <div class="body mp">${mpPeople(d,false,true)}
@@ -5623,20 +5632,24 @@ function mpPlayView(d){const q=d.qs[d.k],K=d.k,me=MP.me,mine=d.ph==="ans"&&d.bz=
   $.querySelectorAll(".opt").forEach(b=>b.onclick=()=>mpAnswer(+b.dataset.k));
   const bz=document.getElementById("mp-bz");if(bz)bz.onclick=mpBuzz;
   $.querySelectorAll("[data-ab]").forEach(b=>b.onclick=()=>mpUseAb(+b.dataset.ab))}
-function mpCanBuzz(d){return d&&d.st==="play"&&d.ph==="q"&&!d.bz&&!(d.lk||[]).includes(MP.me)&&performance.now()>=MP.frzUntil&&!MP.sending}
-function mpBuzz(){const d=MP&&MP.d;if(!mpCanBuzz(d))return;const K=d.k,me=MP.me;MP.sending=true;se("buzz");
-  MPB.tx(MP.code,x=>{if(!x||x.st!=="play"||x.k!==K||x.ph!=="q"||x.bz||(x.lk||[]).includes(me)||!x.pl[me]||x.pl[me].out)return null;return{bz:me,ph:"ans",an:x.an+1}})
-   .then(ok=>{if(MP&&!ok){MP.sending=false;mpRender(true)}}).catch(()=>{if(MP){MP.sending=false;mpRender(true)}})}
-function mpAnswer(p){const d=MP&&MP.d;if(!d||d.st!=="play"||d.ph!=="ans"||d.bz!==MP.me||MP.sending)return;const K=d.k,q=d.qs[K],me=MP.me,ok=p>=0&&q.o[p]===q.a;
+function mpMine(d){return d.st==="play"&&((d.ph==="ans"&&d.bz===MP.me)||(!!MP.opt&&MP.opt.k===d.k&&d.ph==="q"&&!d.bz))}
+function mpCanBuzz(d){return d&&d.st==="play"&&d.ph==="q"&&!d.bz&&!(d.lk||[]).includes(MP.me)&&performance.now()>=MP.frzUntil&&!MP.sending&&!MP.opt}
+/* 押した瞬間に自分の番として表示し、あとから通信で確定させる */
+function mpBuzz(){const d=MP&&MP.d;if(!mpCanBuzz(d))return;const K=d.k,me=MP.me,o={k:K,t0:performance.now()};MP.opt=o;se("buzz");mpRender(true);
+  MP.bzP=MPB.tx(MP.code,x=>{if(!x||x.st!=="play"||x.k!==K||x.ph!=="q"||x.bz||(x.lk||[]).includes(me)||!x.pl||!x.pl[me]||x.pl[me].out)return null;return{bz:me,ph:"ans",an:(x.an||0)+1}})
+   .catch(()=>false).then(ok=>{if(MP&&!ok&&MP.opt===o){MP.opt=null;MP.pick=null;MP.sending=false;MP.L.msg[K]="ほかの人のほうが早かった！";mpRender(true)}return ok})}
+function mpAnswer(p){const d=MP&&MP.d;if(!d||!mpMine(d)||MP.sending||(MP.pick&&MP.pick.k===d.k))return;const K=d.k,q=d.qs[K],me=MP.me,ok=p>=0&&q.o[p]===q.a;
   const shield=!ok&&p>=0&&MP.L.sh[K]&&Math.random()<MP.L.sh[K];if(MP.L.sh[K]&&!ok&&p>=0)MP.L.sh[K]=0;
-  MP.sending=true;se(ok?"ok":"ng");
-  MPB.tx(MP.code,x=>{if(!x||x.st!=="play"||x.k!==K||x.ph!=="ans"||x.bz!==me)return null;const wp=[...(x.wp||[]),{u:me,p}];
+  MP.sending=true;MP.pick={k:K,p,ok};se(ok?"ok":"ng");mpRender(true);
+  const send=()=>MPB.tx(MP.code,x=>{if(!x||x.st!=="play"||x.k!==K||x.ph!=="ans"||x.bz!==me)return null;const wp=[...(x.wp||[]),{u:me,p}];
     if(ok)return{["pl."+me+".sc"]:(x.pl[me].sc||0)+1,ph:"rev",res:{u:me,p},wp,an:x.an+1};
     if(shield)return{wp,an:x.an+1};
     const lk=[...(x.lk||[]),me];if(mpAct(x).every(u=>lk.includes(u)))return{lk,wp,bz:null,ph:"rev",res:{u:null},an:x.an+1};
-    return{lk,wp,bz:null,ph:"q",qt:MP_STEAL,an:x.an+1}})
-   .then(r=>{if(!MP)return;if(r){mpGain(q,ok);if(shield)MP.L.msg[K]="「守り」が発動！ もう一度答えられます"}else MP.sending=false;mpRender(true)})
-   .catch(()=>{if(MP){MP.sending=false;mpRender(true)}})}
+    return{lk,wp,bz:null,ph:"q",qt:MP_STEAL,an:x.an+1}});
+  const undo=()=>{if(!MP)return;MP.sending=false;if(MP.pick&&MP.pick.k===K)MP.pick=null;mpRender(true)};
+  Promise.resolve(MP.opt&&MP.opt.k===K?MP.bzP:true).then(won=>won?send():(undo(),null))
+   .then(r=>{if(!MP||r==null)return;if(r){mpGain(q,ok);if(shield){MP.L.msg[K]="「守り」が発動！ もう一度答えられます";MP.pick=null;MP.sending=false}mpRender(true)}else undo()})
+   .catch(undo)}
 function mpGain(q,ok){S.total++;S.cat[q.c]=S.cat[q.c]||[0,0];S.cat[q.c][1]++;applyDecay();decayBy(3,2,1);
   if(ok){S.right++;S.cat[q.c][0]++;const xg=xpGain();S.pet.xp+=xg.g;S.pet.cat[q.c]=(S.pet.cat[q.c]||0)+1;evolve()}save()}
 /* サポート能力（対戦相手が人なので一部を調整） */
@@ -5656,13 +5669,15 @@ function mpUseAb(j){const d=MP&&MP.d;if(!d||d.st!=="play"||d.ph==="rev")return;c
 function mpTick(){if(!MP||!MP.d)return;const d=MP.d,e=(performance.now()-MP.t0)/1000,me=MP.me;
   if(d.st==="play"){const bar=document.getElementById("mpbar"),st=document.getElementById("mpst"),bz=document.getElementById("mp-bz"),bzs=document.getElementById("mp-bzs");
     let lim=0,txt="";
-    if(d.ph==="q"){lim=d.qt||MP_Q;txt=(d.lk||[]).includes(me)?"まちがえたので、この問題はおやすみ":(d.wp||[]).length?"横取りチャンス！ わかったら早押し":"わかったら早押し！"}
-    else if(d.ph==="ans"){lim=MP_ANS;txt=d.bz===me?`あなたの番！ ${Math.max(0,Math.ceil(MP_ANS-e))}秒以内に答えて`:`${mpNm(d,d.bz)}さんが押した！`;
-      if(d.bz===me&&e>=MP_ANS&&MP.autoSent!==MP.phKey){MP.autoSent=MP.phKey;mpAnswer(-1)}}
+    const mine=mpMine(d),e2=MP.opt?(performance.now()-MP.opt.t0)/1000:e;let ee=e;
+    if(mine){lim=MP_ANS;ee=e2;const answered=MP.pick&&MP.pick.k===d.k;txt=answered?"判定中…":`あなたの番！ ${Math.max(0,Math.ceil(MP_ANS-e2))}秒以内に答えて`;
+      const ak=`${d.k}|${d.an}|${MP.opt?1:0}`;if(e2>=MP_ANS&&!answered&&MP.autoSent!==ak){MP.autoSent=ak;mpAnswer(-1)}}
+    else if(d.ph==="q"){lim=d.qt||MP_Q;txt=(d.lk||[]).includes(me)?"まちがえたので、この問題はおやすみ":(d.wp||[]).length?"横取りチャンス！ わかったら早押し":"わかったら早押し！"}
+    else if(d.ph==="ans"){lim=MP_ANS;txt=`${mpNm(d,d.bz)}さんが押した！`}
     else{lim=MP_REV;const nx=document.getElementById("mp-next");if(nx)nx.textContent=d.k>=d.qs.length-1?`${Math.max(0,Math.ceil(MP_REV-e))}秒後に結果発表`:`${Math.max(0,Math.ceil(MP_REV-e))}秒後に次の問題`}
-    if(bar)bar.style.width=Math.max(0,100-e/lim*100)+"%";if(st&&txt)st.textContent=txt;
+    if(bar)bar.style.width=Math.max(0,100-ee/lim*100)+"%";if(st&&txt)st.textContent=txt;
     if(bz){const fr=performance.now()<MP.frzUntil,can=mpCanBuzz(d);bz.disabled=!can;
-      if(bzs)bzs.textContent=fr?`${mpNm(d,MP.frzBy)}さんに止められた！ ${((MP.frzUntil-performance.now())/1000).toFixed(1)}秒`:d.ph==="ans"?(d.bz===me?"上の選択肢から答えを選んでね":"ほかの人が解答中"):(d.lk||[]).includes(me)?"この問題はおやすみ":""}}
+      if(bzs)bzs.textContent=fr?`${mpNm(d,MP.frzBy)}さんに止められた！ ${((MP.frzUntil-performance.now())/1000).toFixed(1)}秒`:mine?"上の選択肢から答えを選んでね":d.ph==="ans"?"ほかの人が解答中":(d.lk||[]).includes(me)?"この問題はおやすみ":""}}
   if(d.host===me)mpHost(d,e);
   if(Date.now()-MP.watchAt>3000){MP.watchAt=Date.now();mpWatch(d)}}
 function mpHost(d,e){if(d.st!=="play")return;const key=MP.phKey;if(MP.hostBusy===key)return;const K=d.k,an=d.an;let fn=null;
