@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 <style>html,body{margin:0;padding:0}</style>
+<script>window.__PWA=1</script>
 </head>
 <body>
 <title>常識クイズ検定</title>
@@ -744,6 +745,49 @@ button.pill{font-family:inherit;color:var(--ink);cursor:pointer}
 .bld.casino{grid-column:1/-1}
 .sseg.bt .segb{font-size:12px;padding:8px 2px}
 .segb .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ng);margin-left:3px;vertical-align:top}
+/* みんなで対戦 */
+.mp .mpcard{background:#fff;border:3px solid var(--ink);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 0 var(--ink)}
+.mp .mpcard>b{font-size:15px}
+.mp .mpcard small{font-size:11px;color:var(--muted);line-height:1.4}
+.mp input{font:inherit;font-size:16px;border:3px solid var(--ink);border-radius:12px;padding:8px 10px;width:100%;box-sizing:border-box;background:#fffdf7}
+.mp .mpcode-in{font-family:var(--display);font-size:24px;letter-spacing:.3em;text-align:center}
+.mprow{display:flex;gap:8px;align-items:center}
+.mprow input{flex:1;min-width:0}
+.mprow .btn{flex:0 0 96px;width:96px;margin:0}
+.mpnext{margin:6px 0 0;text-align:center;font-size:12px;font-weight:900;color:var(--muted)}
+.mpseg{display:flex;gap:6px}
+.mpseg button{flex:1;font:inherit;font-size:13px;font-weight:700;padding:8px 4px;border:3px solid var(--ink);border-radius:12px;background:#fff;cursor:pointer}
+.mpseg button.on{background:#f2c94c;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)}
+.mpmsg{margin:0;min-height:18px;text-align:center;font-size:13px;font-weight:900;color:#fff;text-shadow:0 2px 0 var(--ink)}
+.mpcode{background:#fff;border:3px solid var(--ink);border-radius:18px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 4px 0 var(--ink)}
+.mpcode small{font-size:12px;color:var(--muted)}
+.mpcode b{font-family:var(--display);font-size:46px;letter-spacing:.18em;line-height:1.1}
+.mpcode button{font:inherit;font-size:12px;font-weight:700;border:2px solid var(--ink);border-radius:10px;background:#fff3c4;padding:4px 12px;cursor:pointer}
+.mpinfo{margin:0;text-align:center;font-size:12px;font-weight:700;color:#fff;text-shadow:0 2px 0 var(--ink)}
+.mpps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mpp{background:#fff;border:3px solid var(--ink);border-radius:14px;padding:4px 2px;display:flex;flex-direction:column;align-items:center;position:relative;min-width:0}
+.mpp canvas{width:56px;height:46px}
+.mpp b{font-size:10.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px}
+.mpp em{font-style:normal;font-size:9.5px;color:var(--muted);line-height:1.2;min-height:12px}
+.mpp .vsp{width:28px;height:28px;font-size:15px;top:-9px;right:-6px}
+.mpp.me{background:#fff3c4}
+.mpp.bz{outline:4px solid var(--mark)}
+.mpp.out{opacity:.4}
+.mpp.empty{border-style:dashed;border-color:rgba(255,255,255,.7);background:transparent;color:#fff;justify-content:center;min-height:80px;font-size:11px;font-weight:700}
+.mpps.big .mpp canvas{width:64px;height:54px}
+.mpbuzz{display:block;width:100%;font-family:var(--display);font-size:24px;color:#fff;background:var(--mark);border:4px solid var(--ink);border-radius:999px;padding:12px;box-shadow:0 6px 0 var(--ink);cursor:pointer}
+.mpbuzz:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
+.mpbuzz:disabled{background:#9a8f88;cursor:default}
+.mpbuzz small{display:block;font-family:var(--body);font-size:11px;font-weight:700}
+.mprank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.mprank li{display:flex;align-items:center;gap:8px;background:#fff;border:3px solid var(--ink);border-radius:14px;padding:4px 10px}
+.mprank li.me{background:#fff3c4}
+.mprank .no{font-family:var(--display);font-size:20px;width:28px;text-align:center}
+.mprank canvas{width:52px;height:42px}
+.mprank b{flex:1;font-size:14px}
+.mprank .pt{font-family:var(--display);font-size:20px}
+.mprank small{font-size:10px;color:var(--muted)}
+.mpurl{margin:0;font-family:var(--mono,monospace);font-size:13px;word-break:break-all;background:#f4efe6;border-radius:10px;padding:8px 10px}
 </style>
 
 <div id="shell">
@@ -5421,6 +5465,245 @@ town=function(){stopTimer();cancelAnimationFrame(petRaf);applyDecay();setTab("to
     seg.querySelectorAll("[data-bt]").forEach(x=>x.onclick=()=>{if(SL&&SL.on||RL.busy)return;$.scrollTop=0;life(x.dataset.bt)})}}}
 {const _h=home;home=function(){_h();checkOpen()}}
 {const _mt=monthTick;monthTick=function(r){const o=_mt(r);setTimeout(()=>checkOpen(),1200);return o}}
+
+/* ===================== みんなで対戦（Firebase・リアルタイム早押し） ===================== */
+const FB_CFG={apiKey:"AIzaSyBSqMKgMgj56QUi3s6Oyiry7NYeHsrdOGE",authDomain:"quiz-app-24d28.firebaseapp.com",projectId:"quiz-app-24d28",storageBucket:"quiz-app-24d28.firebasestorage.app",messagingSenderId:"966526077315",appId:"1:966526077315:web:c02ce1354b1baaa5654eb6"};
+const MP_URL="https://kmkz615-collab.github.io/quiz-app/";
+const MP_MOCK=/[?&#]mpmock=1/.test(location.search+location.hash)||!!window.__MPMOCK;
+const mpAvail=()=>MP_MOCK||!!window.__PWA||/github\.io$/.test(location.hostname);
+const MP_ANS=10,MP_Q=20,MP_STEAL=8,MP_REV=8,MP_LOST=25000,MP_STALE=2*3600e3,MP_WIN=30000,MP_JOIN=5000;
+const isDel=v=>v&&typeof v==="object"&&v.__del===1;
+let MPB=null,MPBP=null;
+function mpBackend(){if(MPB)return Promise.resolve(MPB);if(!MPBP)MPBP=(MP_MOCK?Promise.resolve(mpMock()):mpFire()).then(b=>MPB=b).catch(e=>{MPBP=null;throw e});return MPBP}
+async function mpFire(){const V="https://www.gstatic.com/firebasejs/10.12.4/";
+  const [A,U,F]=await Promise.all([import(V+"firebase-app.js"),import(V+"firebase-auth.js"),import(V+"firebase-firestore.js")]);
+  const app=A.initializeApp(FB_CFG),auth=U.getAuth(app),db=F.getFirestore(app);
+  const uid=auth.currentUser?auth.currentUser.uid:(await U.signInAnonymously(auth)).user.uid;
+  const ref=c=>F.doc(db,"rooms",c),fix=p=>{const o={};for(const k in p)o[k]=isDel(p[k])?F.deleteField():p[k];return o};
+  return{uid,
+    get:async c=>{const s=await F.getDoc(ref(c));return s.exists()?s.data():null},
+    upd:(c,p)=>F.updateDoc(ref(c),fix(p)),
+    sub:(c,cb)=>F.onSnapshot(ref(c),s=>cb(s.exists()?s.data():null),e=>cb(undefined,e)),
+    tx:(c,fn)=>F.runTransaction(db,async t=>{const s=await t.get(ref(c)),p=fn(s.exists()?s.data():null);if(!p)return false;if(p.__set)t.set(ref(c),p.__set);else t.update(ref(c),fix(p));return true})}}
+/* 動作確認用（同じブラウザのタブどうしでつながる） */
+function mpMock(){let uid=sessionStorage.getItem("mpuid");if(!uid){uid="u"+Math.random().toString(36).slice(2,8);sessionStorage.setItem("mpuid",uid)}
+  const K=c=>"mpmock:"+c,rd=c=>{try{return JSON.parse(localStorage.getItem(K(c)))}catch(e){return null}},subs={};
+  const fire=c=>(subs[c]||[]).forEach(f=>f(rd(c))),wr=(c,d)=>{localStorage.setItem(K(c),JSON.stringify(d));setTimeout(()=>fire(c),0)};
+  const apply=(d,p)=>{d=JSON.parse(JSON.stringify(d));for(const k in p){const ks=k.split(".");let o=d;for(let j=0;j<ks.length-1;j++){o[ks[j]]=o[ks[j]]||{};o=o[ks[j]]}const l=ks[ks.length-1];if(isDel(p[k]))delete o[l];else o[l]=JSON.parse(JSON.stringify(p[k]))}return d};
+  addEventListener("storage",e=>{if(e.key&&e.key.startsWith("mpmock:"))fire(e.key.slice(7))});
+  return{uid,get:async c=>rd(c),upd:async(c,p)=>{const d=rd(c);if(!d)throw new Error("no doc");wr(c,apply(d,p))},
+    sub:(c,cb)=>{(subs[c]=subs[c]||[]).push(cb);setTimeout(()=>cb(rd(c)),0);return()=>{subs[c]=(subs[c]||[]).filter(f=>f!==cb)}},
+    tx:async(c,fn)=>{const d=rd(c),p=fn(d);if(!p)return false;wr(c,p.__set?p.__set:apply(d,p));return true}}}
+
+/* ---------- 共通 ---------- */
+let MP=null;
+const mpAct=d=>Object.keys((d&&d.pl)||{}).filter(u=>!d.pl[u].out).sort((a,b)=>d.pl[a].j-d.pl[b].j);
+const mpAll=d=>Object.keys((d&&d.pl)||{}).sort((a,b)=>d.pl[a].j-d.pl[b].j);
+const mpNm=(d,u)=>u&&d.pl&&d.pl[u]?d.pl[u].nm:"だれか";
+const mpRid=()=>Math.random().toString(36).slice(2,8);
+function mpMe(){return{nm:(S.nick||"プレイヤー").slice(0,8),f:S.pet.form,w:JSON.parse(JSON.stringify(S.life.wear||null)),sc:0,hb:Date.now(),j:Date.now()}}
+function mpQs(co,n){const pool=(co==="hr"?POOL_HR:POOL).filter(q=>!q.t&&q.o&&q.o.length>=3);return shuffle(pool).slice(0,n).map(q=>({id:q.id,c:q.c,q:q.q,a:q.a,o:shuffle([q.a,...q.o]),e:q.e||""}))}
+function mpErr(e){const m=String(e&&(e.code||e.message)||e);return /permission/i.test(m)?"通信が許可されませんでした（設定を確認中）":/network|unavailable|failed to fetch|import/i.test(m)?"通信できませんでした。電波のよいところでもう一度":"うまくいきませんでした。もう一度ためしてください"}
+const XSVG='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3a2e2a" stroke-width="3.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+
+/* ---------- 入口 ---------- */
+function mpOpen(){if(deadNow())return;if(!mpAvail())return mpNoSheet();mpLobby()}
+function mpNoSheet(){openSheet("みんなで対戦",`<p class="lead" style="margin:0">友だちと<b>同時に早押し対戦</b>ができます。<br>この画面からは通信できないので、<b>アプリ版</b>で遊んでください。</p><p class="mpurl">${MP_URL}</p>
+  <div class="rvrow"><button class="btn" id="mp-cp">URLをコピー</button><button class="btn ghost" id="mp-cl">とじる</button></div>
+  <p class="muted" style="font-size:11px;margin:0">アプリ版の記録はこことは別です。じっせきの「バックアップ」のコードで記録を引っ越せます。</p>`,R=>{
+  R.querySelector("#mp-cl").onclick=closeSheet;R.querySelector("#mp-cp").onclick=async e=>{try{await navigator.clipboard.writeText(MP_URL);e.target.textContent="コピーしました"}catch(_){e.target.textContent="長押しでコピーしてね"}}})}
+{const _q=quizHub;quizHub=function(){_q();const g=$.querySelector(".hgrid");if(!g||document.getElementById("go-mp"))return;const D=deadNow();
+  const b=document.createElement("button");b.className="hbtn dark";b.id="go-mp";b.disabled=D;b.innerHTML=`<b>みんなで対戦</b><small>${mpAvail()?"友だちと同時に早押し・2〜4人":"アプリ版で遊べます"}</small>`;
+  const rv=document.getElementById("go-rival");if(rv)rv.after(b);else g.append(b);b.onclick=mpOpen}}
+
+/* ---------- ロビー ---------- */
+let mpSel={co:null,n:10};
+function mpLobby(msg){mpQuit();setTab("quiz","quiz");cancelAnimationFrame(petRaf);$.scrollTop=0;bgm("room");mpSel.co=mpSel.co||S.course||"jo";
+  $.innerHTML=`<div class="strip"><button class="qx" id="mp-x" aria-label="もどる">${XSVG}</button><span>みんなで対戦</span></div>
+  <div class="body mp">
+   <div class="mpcard"><b>ニックネーム</b><input id="mp-nm" maxlength="8" value="${esc(S.nick||"")}" placeholder="8文字まで"></div>
+   <div class="mpcard"><b>部屋をつくる</b>
+     <div class="mpseg" id="mp-co">${Object.entries(COURSES).map(([k,c])=>`<button data-v="${k}" class="${mpSel.co===k?"on":""}">${k==="hr"?"人事労務":c.name}</button>`).join("")}</div>
+     <div class="mpseg" id="mp-n">${[5,10,15].map(n=>`<button data-v="${n}" class="${mpSel.n===n?"on":""}">${n}問</button>`).join("")}</div>
+     <button class="btn" id="mp-make">部屋をつくる</button></div>
+   <div class="mpcard"><b>番号で入る</b><div class="mprow"><input id="mp-code" class="mpcode-in" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000"><button class="btn" id="mp-join">入る</button></div>
+     <small>友だちに教えてもらった4ケタの番号を入れてね</small></div>
+   <p class="mpmsg" id="mp-msg">${msg||""}</p></div>`;
+  const M=t=>{document.getElementById("mp-msg").textContent=t};
+  document.getElementById("mp-x").onclick=quizHub;
+  const nm=document.getElementById("mp-nm");const keep=()=>{const v=nm.value.trim().slice(0,8);if(!v){M("ニックネームを入れてね");nm.focus();return false}S.nick=v;save();return true};
+  $.querySelectorAll("#mp-co button").forEach(b=>b.onclick=()=>{mpSel.co=b.dataset.v;$.querySelectorAll("#mp-co button").forEach(x=>x.classList.toggle("on",x===b))});
+  $.querySelectorAll("#mp-n button").forEach(b=>b.onclick=()=>{mpSel.n=+b.dataset.v;$.querySelectorAll("#mp-n button").forEach(x=>x.classList.toggle("on",x===b))});
+  const busy=on=>["mp-make","mp-join"].forEach(id=>document.getElementById(id).disabled=on);
+  document.getElementById("mp-make").onclick=async()=>{if(!keep())return;busy(true);M("部屋をつくっています…");try{const code=await mpMake(mpSel.co,mpSel.n);if(code)mpEnter(code);else{busy(false);M("部屋をつくれませんでした。もう一度ためしてください")}}catch(e){busy(false);M(mpErr(e))}};
+  document.getElementById("mp-join").onclick=async()=>{if(!keep())return;const c=document.getElementById("mp-code").value.replace(/\D/g,"");if(c.length!==4)return M("4ケタの番号を入れてね");busy(true);M("さがしています…");
+    try{const r=await mpJoin(c);if(r===true)mpEnter(c);else{busy(false);M(r)}}catch(e){busy(false);M(mpErr(e))}}}
+async function mpMake(co,n){const B=await mpBackend(),qs=mpQs(co,n);
+  for(let t=0;t<8;t++){const code=String(1000+Math.floor(Math.random()*9000));
+    const ok=await B.tx(code,d=>{if(d&&d.st!=="end"&&Date.now()-(d.ts||0)<MP_STALE&&mpAct(d).length)return null;
+      return{__set:{host:B.uid,st:"wait",co,n,qs,k:0,ph:"q",bz:null,lk:[],wp:[],res:null,frz:null,an:0,qt:MP_Q,ts:Date.now(),pl:{[B.uid]:mpMe()}}}});
+    if(ok)return code}return null}
+async function mpJoin(code){const B=await mpBackend();let why="その番号の部屋は見つかりません";
+  const ok=await B.tx(code,d=>{if(!d||Date.now()-(d.ts||0)>MP_STALE){why="その番号の部屋は見つかりません";return null}
+    const me=d.pl&&d.pl[B.uid];if(me&&!me.out)return{["pl."+B.uid+".hb"]:Date.now(),["pl."+B.uid+".nm"]:(S.nick||"プレイヤー").slice(0,8)};
+    if(d.st!=="wait"){why="この部屋はもう対戦が始まっています";return null}
+    if(mpAct(d).length>=4){why="この部屋は満員です（4人まで）";return null}
+    return{["pl."+B.uid]:mpMe()}});
+  return ok?true:why}
+
+/* ---------- 部屋に入ってから ---------- */
+function mpEnter(code){mpQuit();const B=MPB;
+  MP={code,me:B.uid,d:null,lastSt:null,phKey:"",t0:performance.now(),seen:{},hbv:{},frzId:null,frzUntil:0,frzBy:null,L:{gone:{},sh:{},msg:{}},ab:[],sending:false,rew:false,hostBusy:"",rk:"",autoSent:"",watchAt:0};
+  MP.un=B.sub(code,mpSnap);
+  MP.hb=setInterval(()=>{if(MP&&MP.d)B.upd(code,{["pl."+MP.me+".hb"]:Date.now()}).catch(()=>{})},8000);
+  MP.tk=setInterval(mpTick,100)}
+function mpQuit(){if(!MP)return;const m=MP;MP=null;clearInterval(m.hb);clearInterval(m.tk);try{m.un&&m.un()}catch(e){}
+  const d=m.d;if(d&&d.pl&&d.pl[m.me]&&MPB){const p=d.st==="play"?{["pl."+m.me+".out"]:true}:{["pl."+m.me]:{__del:1}};MPB.upd(m.code,p).catch(()=>{})}}
+function mpSnap(d,err){if(!MP)return;
+  if(err){const s=document.getElementById("mpst")||document.getElementById("mp-msg");if(s)s.textContent="通信が不安定です…";return}
+  if(!d||!d.pl||!d.pl[MP.me]){const was=MP.d;MP.d=null;mpQuit();if(was)mpLobby("部屋から出ました");return}
+  if(d.pl[MP.me].out&&d.st==="play"){MP.d=null;mpQuit();mpLobby("通信が切れたため、退出あつかいになりました");return}
+  const now=Date.now();Object.keys(d.pl).forEach(u=>{if(MP.hbv[u]!==d.pl[u].hb||MP.seen[u]==null){MP.hbv[u]=d.pl[u].hb;MP.seen[u]=now}});
+  const prev=MP.d;MP.d=d;
+  const key=`${d.st}|${d.k}|${d.ph}|${d.an}`;if(key!==MP.phKey){MP.phKey=key;MP.t0=performance.now();MP.sending=false;
+    if(prev&&d.st==="play"){if(d.ph==="ans"&&d.bz&&d.bz!==MP.me&&prev.bz!==d.bz)se("buzz");
+      if(d.ph==="rev"&&prev.ph!=="rev"&&d.res){if(d.res.u===MP.me)se("ok");else se("ng")}}}
+  if(d.frz&&d.frz.id!==MP.frzId){MP.frzId=d.frz.id;if(d.frz.by!==MP.me&&d.frz.k===d.k&&d.st==="play"){MP.frzUntil=performance.now()+d.frz.s*1000;MP.frzBy=d.frz.by;se("ng")}}
+  if(d.st==="play"&&MP.lastSt!=="play"){if(S.course!==d.co){S.course=d.co;save()}MP.ab=supList().map(x=>({...x,used:false}));MP.L={gone:{},sh:{},msg:{}};MP.rew=false;MP.frzUntil=0;bgm("boss")}
+  if(d.st==="end"&&!MP.rew){MP.rew=true;if(MP.lastSt==="play")mpReward(d)}
+  if(d.st==="wait"&&MP.lastSt!=="wait"){MP.rew=false;bgm("room")}
+  MP.lastSt=d.st;mpRender()}
+function mpRender(force){if(!MP||!MP.d)return;const d=MP.d;
+  const strip=JSON.stringify(d,(k,v)=>k==="hb"?undefined:v)+"|"+JSON.stringify(MP.L)+"|"+MP.ab.map(a=>a.used?1:0).join("")+(MP.endMsg||"");
+  if(!force&&strip===MP.rk)return;MP.rk=strip;const st=$.scrollTop;
+  if(d.st==="wait")mpWaitView(d);else if(d.st==="play")mpPlayView(d);else mpEndView(d);
+  $.scrollTop=st;mpTick()}
+function mpPeople(d,big,showSt){const ids=mpAll(d),cells=ids.map(u=>{const p=d.pl[u],me=u===MP.me,isB=d.st==="play"&&d.ph==="ans"&&d.bz===u;
+    let em="";if(p.out)em="退出";else if(showSt){if(isB)em="解答中！";else if((d.lk||[]).includes(u))em="おやすみ";}else em=u===d.host?"ホスト":"";
+    return `<div class="mpp ${me?"me":""} ${isB?"bz":""} ${p.out?"out":""}"><canvas data-f="${esc(p.f||"egg")}" data-u="${u}"></canvas><b>${esc(p.nm)}${me?"（自分）":""}</b><em>${em}</em>${showSt?`<span class="vsp">${p.sc||0}</span>`:""}</div>`});
+  while(big&&cells.length<4)cells.push(`<div class="mpp empty">あき</div>`);
+  return `<div class="mpps ${big?"big":""}">${cells.join("")}</div>`}
+function mpDraw(){$.querySelectorAll(".mpp canvas,.mprank canvas").forEach(cv=>{const p=MP.d.pl[cv.dataset.u];try{drawStatic(cv,cv.dataset.f,false,p&&p.w||undefined)}catch(e){}})}
+function mpX(d){const x=document.getElementById("mp-x");if(!x)return;x.onclick=()=>{if(d.st!=="play"){mpQuit();quizHub();return}
+  openSheet("対戦をやめる？",`<p class="lead">途中でやめると負けになります。</p><div class="rvrow"><button class="btn" id="mq-y">やめる</button><button class="btn ghost" id="mq-n">つづける</button></div>`,X=>{X.querySelector("#mq-n").onclick=closeSheet;X.querySelector("#mq-y").onclick=()=>{closeSheet();mpQuit();quizHub()}})}}
+
+/* 待合室 */
+function mpWaitView(d){const host=d.host===MP.me,n=mpAct(d).length;setTab("quiz","quiz");
+  $.innerHTML=`<div class="strip"><button class="qx" id="mp-x" aria-label="部屋を出る">${XSVG}</button><span>みんなで対戦　待合室</span></div>
+  <div class="body mp">
+   <div class="mpcode"><small>部屋番号</small><b>${MP.code}</b><button id="mp-cpc">番号をコピー</button></div>
+   <p class="mpinfo">${d.co==="hr"?"人事労務":"常識"}・${d.n}問　｜　LINEなどで番号を送ってね</p>
+   ${mpPeople(d,true,false)}
+   ${host?`<button class="btn center" id="mp-go" ${n<2?"disabled":""}>${n<2?"あと1人そろうとスタートできます":"スタート！"}</button>`:`<p class="mpinfo">ホストがスタートするのを待っています…</p>`}
+   <p class="mpmsg" id="mp-msg"></p></div>`;
+  mpDraw();mpX(d);
+  document.getElementById("mp-cpc").onclick=async e=>{try{await navigator.clipboard.writeText(MP.code);e.target.textContent="コピーしました"}catch(_){e.target.textContent=MP.code}};
+  const go=document.getElementById("mp-go");if(go)go.onclick=()=>{go.disabled=true;mpStart().catch(e=>{go.disabled=false;document.getElementById("mp-msg").textContent=mpErr(e)})}}
+function mpStart(){const me=MP.me;return MPB.tx(MP.code,d=>{if(!d||d.st!=="wait"||d.host!==me||mpAct(d).length<2)return null;
+  const p={st:"play",k:0,ph:"q",an:(d.an||0)+1,qt:MP_Q,bz:null,lk:[],wp:[],res:null,frz:null,ts:Date.now()};
+  Object.keys(d.pl).forEach(u=>{if(d.pl[u].out)p["pl."+u]={__del:1};else p["pl."+u+".sc"]=0});return p})}
+
+/* 対戦中 */
+function mpPlayView(d){const q=d.qs[d.k],K=d.k,me=MP.me,mine=d.ph==="ans"&&d.bz===me,gone=MP.L.gone[K]||[],wp=d.wp||[];setTab("quiz","quiz");
+  const optCls=n=>{let c="opt";const w=wp.filter(x=>x.p===n);if(d.ph==="rev"&&q.o[n]===q.a)c+=" right";else if(w.length)c+=" wrong";if(gone.includes(n)&&!(d.ph==="rev"&&q.o[n]===q.a))c+=" gone";return c};
+  const optDis=n=>!mine||MP.sending||gone.includes(n)||wp.some(x=>x.p===n);
+  const grid=q.o.every(t=>String(t).length<=12);
+  let after="";if(d.ph==="rev"){const r=d.res||{},ok=r.u===me;
+    after=`<div class="slip"><b class="${ok?"ok":"ng"}">${r.u?(ok?"正解！ ＋1点":`${esc(mpNm(d,r.u))}さんが正解`):"だれも正解できなかった"}</b><p>正解は「${esc(q.a)}」。${esc(q.e)}</p></div><p class="mpnext" id="mp-next"></p>`}
+  const ab=MP.ab.length&&d.ph!=="rev"?`<div class="rvab">${MP.ab.map((a,j)=>`<button class="abb ${a.used?"used":""}" data-ab="${j}" ${a.used?"disabled":""}><b>${SUP[a.g].n}${a.full?"":"（半分）"}</b><small>${a.used?"使用済み":mpSupD(a.g,a.full)}</small></button>`).join("")}</div>`:"";
+  $.innerHTML=`<div class="strip"><button class="qx" id="mp-x" aria-label="対戦をやめる">${XSVG}</button><span>みんなで対戦　第${K+1}問 / ${d.qs.length}</span></div>
+  <div class="body mp">${mpPeople(d,false,true)}
+   <div class="buzzbar"><i id="mpbar"></i><span id="mpst"></span></div>
+   <div class="qbox"><span class="cat"><span>【${esc(q.c)}】</span></span><p class="q">${esc(q.q)}</p></div>
+   <ul class="opts ${grid?"grid2":""}">${q.o.map((t,n)=>`<li><button class="${optCls(n)}" data-k="${n}" ${optDis(n)?"disabled":""}><span class="bubble">${LABELS[n]}</span><span>${esc(t)}</span>${wp.filter(x=>x.p===n).map(x=>`<small class="rvm">${esc(mpNm(d,x.u))}</small>`).join("")}</button></li>`).join("")}</ul>
+   ${d.ph!=="rev"?`<button class="mpbuzz" id="mp-bz">早押し！<small id="mp-bzs"></small></button>`:""}
+   ${ab}${MP.L.msg[K]&&d.ph!=="rev"?`<p class="abmsg">${MP.L.msg[K]}</p>`:""}
+   <div id="after" ${after?"":"hidden"}>${after}</div></div>`;
+  mpDraw();mpX(d);
+  $.querySelectorAll(".opt").forEach(b=>b.onclick=()=>mpAnswer(+b.dataset.k));
+  const bz=document.getElementById("mp-bz");if(bz)bz.onclick=mpBuzz;
+  $.querySelectorAll("[data-ab]").forEach(b=>b.onclick=()=>mpUseAb(+b.dataset.ab))}
+function mpCanBuzz(d){return d&&d.st==="play"&&d.ph==="q"&&!d.bz&&!(d.lk||[]).includes(MP.me)&&performance.now()>=MP.frzUntil&&!MP.sending}
+function mpBuzz(){const d=MP&&MP.d;if(!mpCanBuzz(d))return;const K=d.k,me=MP.me;MP.sending=true;se("buzz");
+  MPB.tx(MP.code,x=>{if(!x||x.st!=="play"||x.k!==K||x.ph!=="q"||x.bz||(x.lk||[]).includes(me)||!x.pl[me]||x.pl[me].out)return null;return{bz:me,ph:"ans",an:x.an+1}})
+   .then(ok=>{if(MP&&!ok){MP.sending=false;mpRender(true)}}).catch(()=>{if(MP){MP.sending=false;mpRender(true)}})}
+function mpAnswer(p){const d=MP&&MP.d;if(!d||d.st!=="play"||d.ph!=="ans"||d.bz!==MP.me||MP.sending)return;const K=d.k,q=d.qs[K],me=MP.me,ok=p>=0&&q.o[p]===q.a;
+  const shield=!ok&&p>=0&&MP.L.sh[K]&&Math.random()<MP.L.sh[K];if(MP.L.sh[K]&&!ok&&p>=0)MP.L.sh[K]=0;
+  MP.sending=true;se(ok?"ok":"ng");
+  MPB.tx(MP.code,x=>{if(!x||x.st!=="play"||x.k!==K||x.ph!=="ans"||x.bz!==me)return null;const wp=[...(x.wp||[]),{u:me,p}];
+    if(ok)return{["pl."+me+".sc"]:(x.pl[me].sc||0)+1,ph:"rev",res:{u:me,p},wp,an:x.an+1};
+    if(shield)return{wp,an:x.an+1};
+    const lk=[...(x.lk||[]),me];if(mpAct(x).every(u=>lk.includes(u)))return{lk,wp,bz:null,ph:"rev",res:{u:null},an:x.an+1};
+    return{lk,wp,bz:null,ph:"q",qt:MP_STEAL,an:x.an+1}})
+   .then(r=>{if(!MP)return;if(r){mpGain(q,ok);if(shield)MP.L.msg[K]="「守り」が発動！ もう一度答えられます"}else MP.sending=false;mpRender(true)})
+   .catch(()=>{if(MP){MP.sending=false;mpRender(true)}})}
+function mpGain(q,ok){S.total++;S.cat[q.c]=S.cat[q.c]||[0,0];S.cat[q.c][1]++;applyDecay();decayBy(3,2,1);
+  if(ok){S.right++;S.cat[q.c][0]++;const xg=xpGain();S.pet.xp+=xg.g;S.pet.cat[q.c]=(S.pet.cat[q.c]||0)+1;evolve()}save()}
+/* サポート能力（対戦相手が人なので一部を調整） */
+function mpSupD(g,f){switch(g){case"地理":case"社会":case"勤怠・労働時間":return`ほかの人の早押しボタンを${f?2:1}秒止める`;
+  case"理科":case"給与・税":case"休暇・休業":return f?"選択肢を1つ消す":"50%の確率で選択肢を1つ消す";
+  case"暮らし":case"社会保険":return f?"まちがえても、もう一度答えられる":"50%の確率で、まちがえてももう一度答えられる";
+  default:return SUP[g].d(f)}}
+function mpUseAb(j){const d=MP&&MP.d;if(!d||d.st!=="play"||d.ph==="rev")return;const a=MP.ab[j];if(!a||a.used)return;const K=d.k,q=d.qs[K],f=a.full,ok=f||Math.random()<.5,name=SUP[a.g].n;a.used=true;se("buy");let m="";
+  switch(a.g){
+   case"地理":case"社会":case"勤怠・労働時間":{const s=f?2:1;MPB.upd(MP.code,{frz:{k:K,by:MP.me,s,id:mpRid()}}).catch(()=>{});m=`「${name}」！ ほかの人の早押しボタンを${s}秒止めた`;break}
+   case"理科":case"給与・税":case"休暇・休業":{if(!ok){m=`「${name}」…うまくいかなかった`;break}const g=MP.L.gone[K]=MP.L.gone[K]||[];const c=q.o.map((t,n)=>n).filter(n=>q.o[n]!==q.a&&!g.includes(n)&&!(d.wp||[]).some(w=>w.p===n));if(c.length){g.push(c[Math.floor(Math.random()*c.length)]);m=`「${name}」！ 選択肢を1つ消した`}else m=`「${name}」…もう消せる選択肢がない`;break}
+   case"暮らし":case"社会保険":MP.L.sh[K]=f?1:.5;m=`「${name}」！ この問題はまちがえても${f?"":"（50%の確率で）"}もう一度答えられる`;break;
+   case"ことば":{const t=typeof termsFor==="function"?termsFor(q.q,2):[];let h;if(t&&t.length)h=f?t.map(([w,dd])=>`<b>${esc(w)}</b>：${esc(dd)}`).join("<br>"):`カギになる言葉：<b>${t.map(x=>esc(x[0])).join("・")}</b>`;else{const A=String(q.a);h=f?`答えの頭文字は「<b>${esc(A[0])}</b>」、${A.length}文字`:`答えは<b>${A.length}文字</b>`}m=`「${name}」！ ${h}`;break}
+   case"手続き・法令":{const T=typeof topicFor==="function"?topicFor(q):null;if(!T){m=`「${name}」…手がかりが見つからなかった`;break}const tx=f?String(T.h()).replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim().slice(0,70)+"…":"";m=`「${name}」！ 関係する制度：<b>${esc(T.t)}</b>${f?`<br><small>${esc(tx)}</small>`:""}`;break}}
+  MP.L.msg[K]=m;mpRender(true)}
+/* 毎0.1秒：残り時間・ボタン・ホストの進行役 */
+function mpTick(){if(!MP||!MP.d)return;const d=MP.d,e=(performance.now()-MP.t0)/1000,me=MP.me;
+  if(d.st==="play"){const bar=document.getElementById("mpbar"),st=document.getElementById("mpst"),bz=document.getElementById("mp-bz"),bzs=document.getElementById("mp-bzs");
+    let lim=0,txt="";
+    if(d.ph==="q"){lim=d.qt||MP_Q;txt=(d.lk||[]).includes(me)?"まちがえたので、この問題はおやすみ":(d.wp||[]).length?"横取りチャンス！ わかったら早押し":"わかったら早押し！"}
+    else if(d.ph==="ans"){lim=MP_ANS;txt=d.bz===me?`あなたの番！ ${Math.max(0,Math.ceil(MP_ANS-e))}秒以内に答えて`:`${mpNm(d,d.bz)}さんが押した！`;
+      if(d.bz===me&&e>=MP_ANS&&MP.autoSent!==MP.phKey){MP.autoSent=MP.phKey;mpAnswer(-1)}}
+    else{lim=MP_REV;const nx=document.getElementById("mp-next");if(nx)nx.textContent=d.k>=d.qs.length-1?`${Math.max(0,Math.ceil(MP_REV-e))}秒後に結果発表`:`${Math.max(0,Math.ceil(MP_REV-e))}秒後に次の問題`}
+    if(bar)bar.style.width=Math.max(0,100-e/lim*100)+"%";if(st&&txt)st.textContent=txt;
+    if(bz){const fr=performance.now()<MP.frzUntil,can=mpCanBuzz(d);bz.disabled=!can;
+      if(bzs)bzs.textContent=fr?`${mpNm(d,MP.frzBy)}さんに止められた！ ${((MP.frzUntil-performance.now())/1000).toFixed(1)}秒`:d.ph==="ans"?(d.bz===me?"上の選択肢から答えを選んでね":"ほかの人が解答中"):(d.lk||[]).includes(me)?"この問題はおやすみ":""}}
+  if(d.host===me)mpHost(d,e);
+  if(Date.now()-MP.watchAt>3000){MP.watchAt=Date.now();mpWatch(d)}}
+function mpHost(d,e){if(d.st!=="play")return;const key=MP.phKey;if(MP.hostBusy===key)return;const K=d.k,an=d.an;let fn=null;
+  const act=mpAct(d);
+  if(act.length<2)fn=x=>x&&x.st==="play"?{st:"end"}:null;
+  else if(d.ph==="q"&&(e>=(d.qt||MP_Q)+.3||act.every(u=>(d.lk||[]).includes(u))))fn=x=>x&&x.st==="play"&&x.k===K&&x.an===an&&x.ph==="q"?{ph:"rev",res:{u:null},bz:null,an:an+1}:null;
+  else if(d.ph==="ans"&&(e>=MP_ANS+3||!d.pl[d.bz]||d.pl[d.bz].out))fn=x=>{if(!x||x.st!=="play"||x.k!==K||x.an!==an||x.ph!=="ans")return null;const lk=[...(x.lk||[]),x.bz],wp=[...(x.wp||[]),{u:x.bz,p:-1}];
+    return mpAct(x).every(u=>lk.includes(u))?{lk,wp,bz:null,ph:"rev",res:{u:null},an:an+1}:{lk,wp,bz:null,ph:"q",qt:MP_STEAL,an:an+1}};
+  else if(d.ph==="rev"&&e>=MP_REV)fn=x=>{if(!x||x.st!=="play"||x.k!==K||x.an!==an||x.ph!=="rev")return null;if(K>=x.qs.length-1)return{st:"end",an:an+1};
+    return{k:K+1,ph:"q",bz:null,lk:[],wp:[],res:null,frz:null,qt:MP_Q,an:an+1}};
+  if(!fn)return;MP.hostBusy=key;MPB.tx(MP.code,fn).catch(()=>{}).finally(()=>{if(MP&&MP.hostBusy===key)setTimeout(()=>{if(MP&&MP.hostBusy===key)MP.hostBusy=""},1500)})}
+/* 通信が切れた人の整理と、ホストの引きつぎ */
+function mpWatch(d){const me=MP.me,now=Date.now(),lost=u=>now-(MP.seen[u]||now)>MP_LOST;
+  if(d.host===me){const gone=mpAct(d).filter(u=>u!==me&&lost(u));if(gone.length){const p={};gone.forEach(u=>{p["pl."+u]=d.st==="play"?{...d.pl[u],out:true}:{__del:1}});MPB.upd(MP.code,p).catch(()=>{})}return}
+  const h=d.host,hp=d.pl[h];if(!hp||hp.out||lost(h)){const next=mpAct(d).filter(u=>u!==h)[0];if(next===me)MPB.tx(MP.code,x=>{if(!x||x.host!==h)return null;const p={host:me};if(x.pl[h])p["pl."+h]=x.st==="play"?{...x.pl[h],out:true}:{__del:1};return p}).catch(()=>{})}}
+
+/* 結果 */
+function mpRank(d){const act=new Set(mpAct(d));return mpAll(d).sort((a,b)=>(act.has(b)-act.has(a))||((d.pl[b].sc||0)-(d.pl[a].sc||0))||(d.pl[a].j-d.pl[b].j))}
+function mpWinners(d){const act=mpAct(d);if(!act.length)return[];const top=Math.max(...act.map(u=>d.pl[u].sc||0));return act.filter(u=>(d.pl[u].sc||0)===top)}
+function mpReward(d){const me=MP.me,win=mpWinners(d).includes(me)&&!d.pl[me].out;cnt("mpplay");
+  if(win){S.life.cash+=MP_WIN;cnt("mpwin");jingle("pass");MP.endMsg=`1位！ 賞金 ${YEN(MP_WIN)} を獲得`}else{S.life.cash+=MP_JOIN;jingle("fail");MP.endMsg=`参加賞 ${YEN(MP_JOIN)}`}
+  save();setTimeout(()=>{try{checkTitles()}catch(e){}},600)}
+function mpEndView(d){const me=MP.me,R=mpRank(d),wins=new Set(mpWinners(d)),host=d.host===me;setTab("quiz","quiz");let no=0,prev=null;
+  $.innerHTML=`<div class="strip"><button class="qx" id="mp-x" aria-label="もどる">${XSVG}</button><span>みんなで対戦の結果</span></div>
+  <div class="body mp">
+   <p class="rank">${wins.has(me)?"優勝！":"おつかれさま！"}</p>
+   <ol class="mprank">${R.map((u,j)=>{const p=d.pl[u],sc=p.out?-1:p.sc||0;if(sc!==prev){no=j+1;prev=sc}return `<li class="${u===me?"me":""}"><span class="no">${p.out?"−":no}</span><canvas data-f="${esc(p.f||"egg")}" data-u="${u}"></canvas><b>${esc(p.nm)}${u===me?"（自分）":""}${p.out?"<br><small>途中で退出</small>":""}</b><span class="pt">${p.sc||0}</span></li>`}).join("")}</ol>
+   <p class="lead" style="margin:0">${MP.endMsg||""}<br><small>正解した問題の分は、ふだんのクイズと同じように経験値が入っています。</small></p>
+   <button class="btn ghost center" id="mp-rv">問題をふりかえる（${d.qs.length}問）</button>
+   ${host?`<button class="btn center" id="mp-again">同じ部屋でもう一度</button>`:`<p class="mpinfo">ホストが「もう一度」を押すと、続けて遊べます</p>`}
+   <button class="btn ghost center" id="mp-hub">クイズにもどる</button></div>`;
+  mpDraw();mpX(d);document.getElementById("mp-hub").onclick=()=>{mpQuit();quizHub();setTimeout(()=>{try{flushEvo()}catch(e){}},500)};
+  document.getElementById("mp-rv").onclick=()=>openSheet("ふりかえり",`<ul class="review">${d.qs.map((q,j)=>`<li><span class="m">${j+1}</span><span>${esc(q.q)}<small>正解：${esc(q.a)}</small><small>${esc(q.e)}</small></span></li>`).join("")}</ul>`);
+  const ag=document.getElementById("mp-again");if(ag)ag.onclick=()=>{ag.disabled=true;const qs=mpQs(d.co,d.n);MPB.tx(MP.code,x=>{if(!x||x.st!=="end"||x.host!==me)return null;
+    const p={st:"wait",qs,k:0,ph:"q",bz:null,lk:[],wp:[],res:null,frz:null,an:(x.an||0)+1,qt:MP_Q,ts:Date.now()};Object.keys(x.pl).forEach(u=>{if(x.pl[u].out)p["pl."+u]={__del:1};else p["pl."+u+".sc"]=0});return p}).catch(()=>{ag.disabled=false})};
+  MP.endMsg=MP.endMsg||""}
+
+/* 称号 */
+TITLES.push(["mp1","対戦デビュー","みんなで対戦に参加した",()=>C_("mpplay")>=1],["mpwin","初優勝","みんなで対戦で1位になった",()=>C_("mpwin")>=1],["mpwin10","対戦の達人","みんなで対戦で10回1位になった",()=>C_("mpwin")>=10]);
+PROG_T.mp1=()=>[C_("mpplay"),1];PROG_T.mpwin=()=>[C_("mpwin"),1];PROG_T.mpwin10=()=>[C_("mpwin"),10];
+HOW.mp1=HOW.mpwin=HOW.mpwin10="クイズタブの「みんなで対戦」で友だちと早押し対戦（アプリ版）";
 
 S=load();S.srs=S.srs||{};Object.keys(S.streak||{}).forEach(id=>{if(+id>=10000&&!S.srs[id])S.srs[id]={b:Math.min(2,S.streak[id]),due:Date.now(),seen:Date.now()}});ensureLife();evolve();newBadges=[];save();home();
 </script>
