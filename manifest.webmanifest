@@ -1,0 +1,16 @@
+{
+  "name": "常識クイズ検定",
+  "short_name": "常識クイズ",
+  "description": "クイズに答えてキャラを育てる、常識と人事労務の学習ゲーム",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ddefe6",
+  "theme_color": "#ddefe6",
+  "lang": "ja",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
