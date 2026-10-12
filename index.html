@@ -819,6 +819,30 @@ dl.gl dd:last-child{border-bottom:0;padding-bottom:0}
 #calcp .ckeys .op{background:#f2c94c}
 #calcp .ckeys .eq{background:var(--mark);color:#fff}
 #shell.calcon .cnum{background:#fff3c4;border-bottom:3px solid #f2c94c;border-radius:4px;padding:0 2px;cursor:pointer}
+/* へやの名札：小さく上に */
+.scene .namechip{top:14px;bottom:auto;left:50%;transform:translateX(-50%);flex-direction:column;flex-wrap:nowrap;gap:0;padding:4px 12px;max-width:calc(100% - 240px);min-width:90px;font-size:12px;line-height:1.3}
+.scene .namechip .tc,.scene .namechip svg{display:none}
+.scene .namechip .ttl{flex-basis:auto;font-size:9.5px;margin:0;white-space:nowrap}
+/* まちの説明「？」 */
+.strip .helpb{margin-left:auto;flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:3px solid var(--ink);background:#fff3c4;font:inherit;font-size:16px;font-weight:900;color:var(--ink);cursor:pointer;display:grid;place-items:center;padding:0}
+.hlp{padding:8px 0;border-bottom:2px dashed #e4d8cc}.hlp:last-child{border-bottom:0}
+.hlp b{display:block;font-size:14px;margin-bottom:2px}.hlp p{margin:0;font-size:13px;line-height:1.7;color:var(--muted)}
+/* なかま図鑑の詳細 */
+.pc.tap{cursor:pointer}.pc.tap:active{transform:scale(.97)}
+.pdx{display:flex;flex-direction:column;gap:10px}
+.pdtop{display:flex;align-items:center;gap:12px}
+.pdtop canvas{width:120px;height:110px;flex:0 0 120px;background:var(--sky);border-radius:14px}
+.pdnm{display:block;font-family:var(--display);font-weight:400;font-size:22px;line-height:1.2}
+.pdst{display:block;font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+.pdbio{margin:0;font-size:14px;line-height:1.7;background:#fffaf0;border-radius:12px;padding:8px 12px}
+.pdflow{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;flex-wrap:wrap;text-align:center}
+.pdflow span{color:var(--muted)}.pdflow b{background:var(--ink);color:var(--paper);border-radius:999px;padding:2px 10px}.pdflow i{font-style:normal;color:var(--muted)}
+.pdsec small{display:block;font-size:11px;font-weight:900;color:var(--mark);margin-bottom:4px}
+.pdsec ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.pdsec li{font-size:13px;line-height:1.5;background:#fff;border:2px solid var(--line);border-radius:10px;padding:5px 10px}
+.pdsec li b{margin-right:6px}.pdsec li.no{color:var(--muted)}
+.pdhow{margin:0;font-size:14px;line-height:1.7}
+.pdn{margin:0;font-size:12px;color:var(--muted)}
 </style>
 
 <div id="shell">
@@ -5809,6 +5833,101 @@ function calcBtn(after){if(!after)return;const b=document.createElement("button"
 {const _t=setTab;setTab=function(t,m){if(CALC.open&&(t!=="quiz"||!m))calcClose();return _t(t,m)}}
 {const _tr=train;train=function(tab){calcClose();return _tr(tab)}}
 {const _ce=certEnd;certEnd=function(){calcClose();return _ce.apply(this,arguments)}}
+
+/* ===================== まちの説明を短く（くわしくは「？」へ） ===================== */
+function shortLeads(){const tab=lifeTab,lb=document.getElementById("lbody");if(!lb||["家計","カジノ","税務署","借入"].includes(tab))return;const notes=[];
+  lb.querySelectorAll(":scope > p.lead").forEach(p=>{p.classList.remove("clamp","open");p.onclick=null;const html=p.innerHTML.trim(),ix=html.indexOf("。");
+    if(ix<0||ix>=html.length-1)return;const short=html.slice(0,ix+1);if((short.match(/<[a-z]/gi)||[]).length!==(short.match(/<\//g)||[]).length)return;
+    let h=p.previousElementSibling;while(h&&!/^H[234]$/.test(h.tagName))h=h.previousElementSibling;notes.push([h?h.textContent.trim():"",html]);p.innerHTML=short});
+  const strip=$.querySelector(".strip");if(!notes.length||!strip||strip.querySelector(".helpb"))return;
+  const b=document.createElement("button");b.className="helpb";b.textContent="？";b.setAttribute("aria-label","くわしい説明");strip.append(b);
+  b.onclick=()=>openSheet(`${tab}のくわしい説明`,notes.map(([t,h])=>`<div class="hlp">${t?`<b>${esc(t)}</b>`:""}<p>${h}</p></div>`).join(""))}
+{const _l=life;life=function(t,m){_l(t,m);try{shortLeads()}catch(e){}}}
+
+/* ===================== なかま図鑑：タップで詳細 ===================== */
+const PET_BIO={
+ egg:"なにが生まれるかは、これからの勉強しだい。ときどき中でコトコト動いている。",
+ b1:"生まれたばかりのまるい子。正解の音を聞くと、ぴょんとはねる。",
+ b2:"少しだけ大きくなった。どのジャンルが好きか、もうすぐはっきりする。",
+ "地理-1":"甲羅に地図の模様があるカメ。知らない町の名前を聞くと目がかがやく。",
+ "地理-2":"甲羅に山が生えてきた。高いところから景色をながめるのが好き。",
+ "地理-3":"背中に大陸をのせた大ガメ。ゆっくりだけど、どこへでも道案内できる。",
+ "理科-1":"夜空をながめるのが日課。流れ星を見つけると、こっそり願いごとをする。",
+ "理科-2":"体の半分が機械になった。なんでも分解して、仕組みを調べたがる。",
+ "理科-3":"体の中に銀河がうずまいている。宇宙のなぞを考えはじめると眠れない。",
+ "暮らし-1":"台所のにおいが好きな子ねこ。おつかいのおつりは、きっちり数える。",
+ "暮らし-2":"片手をあげて福をまねく。家計簿をつけるのが、ひそかな楽しみ。",
+ "暮らし-3":"家に福をよぶ神さまのねこ。この子がいる家は、なぜかお金がたまる。",
+ "社会-1":"ちょんまげがじまんの子。歴史の年号を口ずさみながら歩く。",
+ "社会-2":"刀のかわりに新聞を持つサムライ。ニュースと経済の話になると熱くなる。",
+ "社会-3":"天下をおさめる将軍。世の中のしくみを見わたして、みんなをまとめる。",
+ "ことば-1":"筆をかかえた子。きれいな字が書けると、しっぽがゆれる。",
+ "ことば-2":"言葉に宿る力のかたまり。ことわざを言うと、まわりが少し明るくなる。",
+ "ことば-3":"言葉の力で空をかける竜。正しい言葉づかいで、みんなのきげんを上げる。",
+ "H-地理-理科":"星の地図を背負ったカメ。地球と宇宙、どちらの道にもくわしい。",
+ "H-地理-暮らし":"福をのせた山のカメ。旅先でもかしこく節約できる。",
+ "H-地理-社会":"背中にお城をのせたカメ。土地と歴史の話なら、ひと晩でも語れる。",
+ "H-地理-ことば":"竜神の力をもつ大ガメ。地名の由来をたずねると、うれしそうに教えてくれる。",
+ "H-理科-暮らし":"宇宙から福をまねくねこ。科学の知恵で、暮らしを便利にする。",
+ "H-理科-社会":"銀河をおさめる将軍。技術と社会の未来を考えるのが好き。",
+ "H-理科-ことば":"星くずのうろこをもつ竜。むずかしい科学も、やさしい言葉で話せる。",
+ "H-暮らし-社会":"家計を守るサムライのねこ。むだづかいは、ひと太刀で見のがさない。",
+ "H-暮らし-ことば":"しっぽが二つに分かれた長生きねこ。昔からの暮らしの知恵とことわざを知っている。",
+ "H-社会-ことば":"竜の王さま。歴史と言葉にくわしく、話し合いでもめごとをおさめる。",
+ "勤怠・労働時間-1":"おなかに時計がある子。始業の時間になると、ピタッと目をさます。",
+ "勤怠・労働時間-2":"1分単位で時間をきざむ。残業を見つけると、そっと知らせてくれる。",
+ "勤怠・労働時間-3":"時間をあやつる時計の主。残業の上限は、すべて頭に入っている。",
+ "休暇・休業-1":"いつもねむそうな子。休むことも仕事のうちだと知っている。",
+ "休暇・休業-2":"有給休暇をきちんと使うのが信条。休み明けは、いつも元気いっぱい。",
+ "休暇・休業-3":"南の島のように明るい子。育休も介護休業も、気持ちよく送り出す。",
+ "給与・税-1":"そろばんをはじくのが大好き。1円のずれも見のがさない。",
+ "給与・税-2":"電卓をかかえた計算の名人。割増賃金の計算なら、まかせてほしい。",
+ "給与・税-3":"給与計算をきわめた達人。年末調整の季節になると、いきいきする。",
+ "社会保険-1":"小さな盾を持つ子。みんなのくらしを守るのが夢。",
+ "社会保険-2":"社会保険の騎士。病気やけがのときに、さっとかけつける。",
+ "社会保険-3":"年金・医療・介護を守る守護神。標準報酬月額の表をそらで言える。",
+ "手続き・法令-1":"はんこを押すと、ほっぺが赤くなる。書類の向きはいつもそろえる。",
+ "手続き・法令-2":"書類の山にうもれても平気。提出期限はカレンダーに全部書いてある。",
+ "手続き・法令-3":"法令をつかさどる大臣。法改正のニュースは、だれよりも早く知っている。",
+ "H-勤怠・労働時間-休暇・休業":"働く時間と休む時間のバランス名人。メリハリのある毎日を送る。",
+ "H-勤怠・労働時間-給与・税":"残業時間と割増賃金を一度に計算できる。深夜の割増も見のがさない。",
+ "H-勤怠・労働時間-社会保険":"長時間労働に目を光らせる。みんなの健康診断の日をおぼえている。",
+ "H-勤怠・労働時間-手続き・法令":"36協定の届出を守る番人。協定なしの残業はゆるさない。",
+ "H-休暇・休業-給与・税":"有給休暇の日数と賃金を、すぐに答えられる。休んでもお給料が出るのがうれしい。",
+ "H-休暇・休業-社会保険":"育児休業と給付金にくわしい。赤ちゃんの笑顔が大好き。",
+ "H-休暇・休業-手続き・法令":"仕事と家庭の両立を応援する。休業の申出書は、いつも準備ばっちり。",
+ "H-給与・税-社会保険":"標準報酬月額を決めるのが得意。算定基礎届の季節は大いそがし。",
+ "H-給与・税-手続き・法令":"年末調整のプロ。控除の申告書を、まちがいなくさばく。",
+ "H-社会保険-手続き・法令":"社会保険と労働の手続きを一手に引き受ける、たよれる専門家。"};
+/* 出会った時期を記録（この機能より前の分は記録なし） */
+{const _e=evolve;evolve=function(){const before=new Set(S.seen||[]),o=_e.apply(this,arguments);try{S.seenAt=S.seenAt||{};(S.seen||[]).forEach(id=>{if(!before.has(id)&&S.seenAt[id]==null)S.seenAt[id]=S.life?S.life.month:1})}catch(e){}return o}}
+function petCo(f){return f.line&&CATS_HR.includes(f.line)?"人事労務":"常識"}
+function petStage(f){return f.idx===0?"たまご":f.idx<=2?`${f.idx}段階目（共通）`:f.line2?"最終進化（かけ合わせ）":f.idx===5?"最終進化":`${f.idx-2}段階目`}
+function petHow(id){const f=formInfo(id),co=petCo(f);
+  if(f.idx===0)return"最初から持っているたまご。";if(f.idx<=2)return"どのコースでも、正解を重ねて育てると出会える。";
+  if(f.line2)return`${co}コースで「${f.line}」と「${f.line2}」をよく正解し、2位のジャンルが1位の6割以上のまま最終進化させる。`;
+  if(f.idx===3)return`${co}コースで「${f.line}」の問題をいちばん多く正解して、まるっこから進化させる。`;
+  if(f.idx===4)return`${formInfo(f.line+"-1").name}を育てて進化させる。`;
+  return`${co}コースで「${f.line}」をいちばん多く正解し、2位のジャンルが6割未満のまま最終進化させる。`}
+function petFlow(id){const f=formInfo(id),nm=x=>S.seen.includes(x)?formInfo(x).name:"？？？";let pre="",nx="";
+  if(f.idx===1)pre=nm("egg");else if(f.idx===2)pre=nm("b1");else if(f.idx===3)pre=nm("b2");else if(f.idx===4)pre=nm(f.line+"-1");
+  else if(f.idx===5)pre=f.line2?`${nm(f.line+"-2")} か ${nm(f.line2+"-2")}`:nm(f.line+"-2");
+  if(f.idx===0)nx=nm("b1");else if(f.idx===1)nx=nm("b2");else if(f.idx===2)nx="ジャンルで変わる";else if(f.idx===3)nx=nm(f.line+"-2");else if(f.idx===4)nx=`${nm(f.line+"-3")} かかけ合わせ`;
+  return [pre,nx]}
+function petAbilHTML(f){if(!f.line)return`<p class="pdn">ジャンルの姿に進化すると、特技と能力がつきます。</p>`;const ls=f.line2?[f.line,f.line2]:[f.line];
+  const life=ls.map(g=>{const A=ABIL[g],s=f.line2?2:f.idx-2;return A?`<li><b>${A.name}</b>${A.d(s)}</li>`:""}).join("");
+  const sup=f.idx<4?`<li class="no">2段階目から使えるようになります</li>`:ls.map(g=>{const U=SUP[g],full=f.idx===5;return U?`<li><b>${U.n}${full?"":"（半分）"}</b>${U.d(full)}</li>`:""}).join("");
+  return`<div class="pdsec"><small>生活の特技</small><ul>${life}</ul></div><div class="pdsec"><small>対戦のサポート能力（1試合に1回）</small><ul>${sup}</ul></div>`}
+function petSheet(id){const f=formInfo(id),got=(S.seen||[]).includes(id),[pre,nx]=petFlow(id),at=S.seenAt&&S.seenAt[id];
+  openSheet(got?f.name:"？？？",`<div class="pdx">
+   <div class="pdtop"><canvas id="pdcv"></canvas><div><b class="pdnm">${got?f.name:"？？？"}</b><span class="pdst">${petCo(f)}・${petStage(f)}${f.line?`<br>${f.line}${f.line2?"＋"+f.line2:""}`:""}</span></div></div>
+   ${got?`<p class="pdbio">${PET_BIO[id]||""}</p>
+   <div class="pdflow"><span>${pre||"−"}</span><i>→</i><b>${f.name}</b><i>→</i><span>${f.idx>=5?"最終進化":nx}</span></div>
+   ${petAbilHTML(f)}
+   <p class="pdn">出会った時期：${at?monthLabel(at):"記録なし（記録を始める前に出会った）"}</p>`
+   :`<div class="pdsec"><small>会い方のヒント</small><p class="pdhow">${petHow(id)}</p></div>`}</div>`,
+   R=>{const cv=R.querySelector("#pdcv");if(cv)requestAnimationFrame(()=>drawStatic(cv,id,!got))})}
+{const _p=petdex;petdex=function(){_p();$.querySelectorAll(".pc").forEach(pc=>{const cv=pc.querySelector("canvas[data-id]");if(!cv)return;pc.setAttribute("role","button");pc.tabIndex=0;pc.classList.add("tap");pc.onclick=()=>petSheet(cv.dataset.id)})}}
 
 S=load();S.srs=S.srs||{};Object.keys(S.streak||{}).forEach(id=>{if(+id>=10000&&!S.srs[id])S.srs[id]={b:Math.min(2,S.streak[id]),due:Date.now(),seen:Date.now()}});ensureLife();evolve();newBadges=[];save();home();
 </script>
