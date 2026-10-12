@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#ddefe6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -5719,6 +5719,13 @@ function mpEndView(d){const me=MP.me,R=mpRank(d),wins=new Set(mpWinners(d)),host
 TITLES.push(["mp1","対戦デビュー","みんなで対戦に参加した",()=>C_("mpplay")>=1],["mpwin","初優勝","みんなで対戦で1位になった",()=>C_("mpwin")>=1],["mpwin10","対戦の達人","みんなで対戦で10回1位になった",()=>C_("mpwin")>=10]);
 PROG_T.mp1=()=>[C_("mpplay"),1];PROG_T.mpwin=()=>[C_("mpwin"),1];PROG_T.mpwin10=()=>[C_("mpwin"),10];
 HOW.mp1=HOW.mpwin=HOW.mpwin10="クイズタブの「みんなで対戦」で友だちと早押し対戦（アプリ版）";
+
+/* ===================== ダブルタップ・2本指での拡大を止める ===================== */
+{const st=document.createElement("style");st.textContent="html,body,#shell,#shell *{touch-action:manipulation}";document.head?document.head.appendChild(st):document.body.prepend(st);
+  const no=e=>{if(e.cancelable)e.preventDefault()};
+  ["gesturestart","gesturechange","gestureend"].forEach(t=>document.addEventListener(t,no,{passive:false}));
+  document.addEventListener("touchmove",e=>{if(e.touches&&e.touches.length>1)no(e)},{passive:false});
+  document.addEventListener("dblclick",no,{passive:false})}
 
 S=load();S.srs=S.srs||{};Object.keys(S.streak||{}).forEach(id=>{if(+id>=10000&&!S.srs[id])S.srs[id]={b:Math.min(2,S.streak[id]),due:Date.now(),seen:Date.now()}});ensureLife();evolve();newBadges=[];save();home();
 </script>
