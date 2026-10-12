@@ -801,6 +801,24 @@ dl.gl dd:last-child{border-bottom:0;padding-bottom:0}
 .tcard p{margin:3px 0 0 10px;font-size:13px;line-height:1.55;color:var(--muted)}
 .tcard p span{display:inline-block;min-width:4.2em;font-weight:700;color:var(--mark)}
 .tcard p span::after{content:"："}
+/* 電卓 */
+.calcb{align-self:flex-end;display:inline-flex;align-items:center;gap:5px;font:inherit;font-size:13px;font-weight:900;color:var(--ink);background:#fff;border:3px solid var(--ink);border-radius:999px;padding:5px 14px;box-shadow:0 3px 0 var(--ink);cursor:pointer;margin-top:-4px}
+.calcb.on{background:#f2c94c}
+.calcb:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+#shell.calcon #app{padding-bottom:300px}
+#calcp{position:absolute;left:0;right:0;bottom:0;z-index:45;background:#2b2730;border-top:4px solid var(--ink);border-radius:20px 20px 0 0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -6px 20px rgba(0,0,0,.25)}
+#calcp .cdisp{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+#calcp .cdv{flex:1;min-width:0;background:#f4f1e6;border-radius:12px;padding:4px 12px;text-align:right;display:flex;flex-direction:column}
+#calcp .cdv small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:rtl;unicode-bidi:plaintext;min-height:15px}
+#calcp .cdv b{font-family:var(--display);font-size:26px;line-height:1.2;white-space:nowrap;overflow:hidden}
+#calcp .cx{flex:0 0 40px;height:40px;border-radius:12px;border:3px solid var(--ink);background:#fff;display:grid;place-items:center;cursor:pointer}
+#calcp .ckeys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+#calcp .ckeys button{font-family:var(--display);font-size:20px;height:44px;border-radius:12px;border:0;background:#fff;color:var(--ink);box-shadow:0 3px 0 #120f16;cursor:pointer}
+#calcp .ckeys button:active{transform:translateY(2px);box-shadow:0 1px 0 #120f16}
+#calcp .ckeys .fn{background:#d9d2c4}
+#calcp .ckeys .op{background:#f2c94c}
+#calcp .ckeys .eq{background:var(--mark);color:#fff}
+#shell.calcon .cnum{background:#fff3c4;border-bottom:3px solid #f2c94c;border-radius:4px;padding:0 2px;cursor:pointer}
 </style>
 
 <div id="shell">
@@ -5739,6 +5757,58 @@ HOW.mp1=HOW.mpwin=HOW.mpwin10="クイズタブの「みんなで対戦」で友�
   ["gesturestart","gesturechange","gestureend"].forEach(t=>document.addEventListener(t,no,{passive:false}));
   document.addEventListener("touchmove",e=>{if(e.touches&&e.touches.length>1)no(e)},{passive:false});
   document.addEventListener("dblclick",no,{passive:false})}
+
+/* ===================== 電卓（計算が必要な問題・計算ドリル・FP相当の資格試験だけ） ===================== */
+/* 答えが金額で、問題文に数字がある問題＝計算問題 */
+const CALC_CERT=new Set(["money"]);/* くらしのお金マイスター＝FP相当 */
+const calcNeed=q=>{if(!q||q.t)return false;const t=String(q.q||""),rest=t.replace(/(令和|平成)?\d+年(度|分)?|\d+月|\d+日|\d+歳|\d+人/g,"");return /\d/.test(rest)&&(/^約?[\d,.]+\s*万?円(\d+銭)?$/.test(String(q.a))||/(いくら|何円|何万円)/.test(t))};
+function calcAllowed(){if(mode==="cert")return !!(CERT&&CALC_CERT.has(CERT.id));return mode==="normal"||mode==="review"}
+let CALC={open:false,expr:"",done:false};
+const calcFmt=n=>{if(!isFinite(n))return"エラー";const r=Math.round(n*1e6)/1e6;return Math.abs(r)>=1e15?r.toExponential(6):r.toLocaleString("ja-JP",{maximumFractionDigits:6})};
+function calcVal(e){e=String(e).replace(/[+\-×÷.]+$/,"");if(!e)return null;const js=e.replace(/×/g,"*").replace(/÷/g,"/").replace(/(\d+(?:\.\d+)?)%/g,"($1/100)");
+  if(!/^[\d.+\-*/() ]+$/.test(js))return null;try{const v=Function("return ("+js+")")();return typeof v==="number"?v:null}catch(e){return null}}
+const calcShowExpr=e=>e.replace(/\d+(?:\.\d*)?/g,m=>{const[a,b]=m.split(".");return (+a).toLocaleString("ja-JP")+(b!=null?"."+b:"")});
+function calcPaint(){const p=document.getElementById("calcp");if(!p)return;const v=calcVal(CALC.expr);
+  p.querySelector("#cexp").textContent=CALC.expr?calcShowExpr(CALC.expr)+(CALC.done?" =":""):"問題文の数字をタップしても入力できます";
+  p.querySelector("#cval").textContent=v==null?"0":calcFmt(v)}
+function calcKey(k){let e=CALC.expr;const last=e.slice(-1),isOp=c=>"+-×÷".includes(c);
+  if(k==="C"){CALC.expr="";CALC.done=false;return calcPaint()}
+  if(k==="⌫"){CALC.expr=CALC.done?"":e.slice(0,-1);CALC.done=false;return calcPaint()}
+  if(k==="="){const v=calcVal(e);if(v!=null&&isFinite(v)){CALC.expr=String(Math.round(v*1e6)/1e6);CALC.done=true}return calcPaint()}
+  if(isOp(k)){if(!e&&k!=="-")return;CALC.done=false;CALC.expr=isOp(last)?e.slice(0,-1)+k:e+k;return calcPaint()}
+  if(k==="%"){if(/\d$/.test(e)){CALC.expr=e+"%";CALC.done=false}return calcPaint()}
+  if(CALC.done){e="";CALC.done=false}
+  const cur=(e.match(/[\d.]*$/)||[""])[0];
+  if(k==="."){if(cur.includes("."))return;CALC.expr=e+(cur?".":"0.");return calcPaint()}
+  if(last==="%")e+="×";
+  if(k==="00"&&!cur)k="0";
+  if(cur==="0"&&k!==".")e=e.slice(0,-1);
+  CALC.expr=e+k;calcPaint()}
+function calcPut(num){let e=CALC.done?"":CALC.expr;CALC.done=false;const m=e.match(/[\d.]+%?$/);if(m)e=e.slice(0,-m[0].length);CALC.expr=e+num;calcPaint();se("tap")}
+function calcWrap(){if(!CALC.open)return;$.querySelectorAll("p.q").forEach(p=>{if(p.dataset.cw)return;p.dataset.cw=1;
+  const walk=n=>{[...n.childNodes].forEach(c=>{if(c.nodeType===3){const t=c.textContent;if(!/\d/.test(t))return;const f=document.createDocumentFragment();let last=0;
+      t.replace(/\d[\d,，]*(?:\.\d+)?/g,(m,ix)=>{f.append(t.slice(last,ix));const s=document.createElement("span");s.className="cnum";s.textContent=m;s.dataset.v=m.replace(/[,，]/g,"");f.append(s);last=ix+m.length;return m});
+      f.append(t.slice(last));c.replaceWith(f)}else if(c.nodeType===1&&!c.classList.contains("cnum"))walk(c)})};walk(p);
+    p.querySelectorAll(".cnum").forEach(s=>s.onclick=e=>{if(!CALC.open)return;e.stopPropagation();calcPut(s.dataset.v)})})}
+function calcOpen(){CALC.open=true;let p=document.getElementById("calcp");
+  if(!p){p=document.createElement("div");p.id="calcp";p.setAttribute("role","dialog");p.setAttribute("aria-label","電卓");
+    p.innerHTML=`<div class="cdisp"><div class="cdv"><small id="cexp"></small><b id="cval">0</b></div><button class="cx" id="cx" aria-label="電卓を閉じる">${typeof XSVG!=="undefined"?XSVG:"×"}</button></div>
+     <div class="ckeys">${["C","⌫","%","÷","7","8","9","×","4","5","6","-","1","2","3","+","0","00",".","="].map(k=>`<button data-ck="${k}" class="${"+-×÷=".includes(k)?"op":/[C⌫%]/.test(k)?"fn":""} ${k==="="?"eq":""}">${k==="-"?"−":k}</button>`).join("")}</div>`;
+    SH.appendChild(p);p.querySelectorAll("[data-ck]").forEach(b=>b.onclick=()=>{calcKey(b.dataset.ck);se("tap")});p.querySelector("#cx").onclick=calcClose}
+  SH.classList.add("calcon");calcPaint();calcWrap();const b=document.getElementById("calc-b");if(b)b.classList.add("on")}
+function calcClose(){CALC.open=false;SH.classList.remove("calcon");const p=document.getElementById("calcp");if(p)p.remove();const b=document.getElementById("calc-b");if(b)b.classList.remove("on")}
+function calcBtn(after){if(!after)return;const b=document.createElement("button");b.className="calcb"+(CALC.open?" on":"");b.id="calc-b";
+  b.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M8.5 7h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></svg>電卓`;
+  after.after(b);b.onclick=()=>CALC.open?calcClose():calcOpen();if(CALC.open)calcWrap()}
+/* 通常試験・復習・FP相当の資格試験：計算が必要な問題だけ */
+{const _s=show;show=function(){_s();const q=qs&&qs[i];if(!calcAllowed()||!calcNeed(q)){if(CALC.open)calcClose();return}calcBtn($.querySelector(".qbox")||$.querySelector("p.q"))}}
+/* 計算ドリル：いつでも */
+{const _d=drillNext;drillNext=function(){_d();calcBtn(document.querySelector("#dq .qcard"))}}
+/* ほかの画面へ移ったら閉じる */
+{const _r=result;result=function(){calcClose();return _r.apply(this,arguments)}}
+{const _t=setTab;setTab=function(t,m){if(CALC.open&&(t!=="quiz"||!m))calcClose();return _t(t,m)}}
+{const _tr=train;train=function(tab){calcClose();return _tr(tab)}}
+{const _ce=certEnd;certEnd=function(){calcClose();return _ce.apply(this,arguments)}}
 
 S=load();S.srs=S.srs||{};Object.keys(S.streak||{}).forEach(id=>{if(+id>=10000&&!S.srs[id])S.srs[id]={b:Math.min(2,S.streak[id]),due:Date.now(),seen:Date.now()}});ensureLife();evolve();newBadges=[];save();home();
 </script>
