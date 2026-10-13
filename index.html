@@ -881,6 +881,20 @@ dl.gl dd:last-child{border-bottom:0;padding-bottom:0}
 .slg .dsk{display:block;font-size:13px;line-height:1.45;background:#fff;border:2px solid var(--line);border-radius:10px;padding:6px 10px}
 .chips.dch.syschips{flex-wrap:wrap!important;overflow:visible;gap:6px}
 #sys-q{flex-direction:column;gap:2px}
+/* 解答と制度ノートのつながり */
+.sysx2{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.systags{display:flex;flex-wrap:wrap;gap:6px}
+.systag{font:inherit;font-size:12.5px;font-weight:900;color:#fff;background:var(--ink);border:0;border-radius:999px;padding:5px 12px;cursor:pointer;display:inline-flex;align-items:baseline;gap:4px}
+.systag small{font-size:10.5px;font-weight:700;color:#f2c94c}
+.sysset,.sysmx{border-radius:12px;padding:8px 12px}
+.sysset{background:#eef7f1;border:2px solid #bfe0cc}.sysmx{background:#fff3e6;border:2px solid #f2c9a0}
+.sysset b,.sysmx b{display:block;font-size:12.5px;margin-bottom:3px}
+.sysset b{color:var(--ok)}.sysmx b{color:#b5651d}
+.sysset ul,.sysmx ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:2px}
+.sysset li,.sysmx li{font-size:13px;line-height:1.55}
+.sysmx1{margin:0;font-size:12px;line-height:1.5;background:#fff3e6;border-radius:10px;padding:5px 10px}.sysmx1 b{color:#b5651d}
+.missb{font-style:normal;font-size:10.5px;font-weight:900;color:#fff;background:var(--ng);border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:2px}
+.syslink{font:inherit;font-size:12px;font-weight:700;color:var(--mark);background:none;border:0;text-decoration:underline;cursor:pointer;padding:0 2px}
 </style>
 
 <div id="shell">
@@ -6112,7 +6126,7 @@ const sysOf=id=>SYS.find(s=>s.id===id);
 let sysSec="one",lawSub="law";
 function sysCards(rows){return `<div class="tcards">${rows.map(r=>`<div class="tcard"><b>${r[0]}</b><p>${r[1]}</p></div>`).join("")}</div>`}
 function sysPage(id){const N=sysOf(id);if(!N)return notes();cancelAnimationFrame(petRaf);setTab("quiz");$.scrollTop=0;
-  const SEC=[["one","ひとことで"],["who","加入"],["pay","保険料・負担"],["get","給付・ルール"],["proc","手続き"],["nums","数字"],["rel","つながり"]];if(!SEC.some(s=>s[0]===sysSec))sysSec="one";
+  const SEC=[["one","ひとことで"],["who","加入"],["pay","お金・負担"],["get","給付・ルール"],["proc","手続き"],["nums","数字"],["rel","つながり"]];if(!SEC.some(s=>s[0]===sysSec))sysSec="one";
   const tps=N.tp.map(t=>TOPICS.findIndex(T=>T.id===t)).filter(j=>j>=0);
   let body="";
   if(sysSec==="one")body=`<p class="sysone">${N.one}</p>`;
@@ -6150,6 +6164,65 @@ function notesSeg(){return `<div class="seg sseg three">${[["制度","制度ノ�
 function bindNotesSeg(){$.querySelectorAll("[data-nt2]").forEach(b=>b.onclick=()=>{noteTab=b.dataset.nt2;$.scrollTop=0;notes()})}
 {const _q=quizHub;quizHub=function(){_q();const b=document.getElementById("go-note");if(b)b.innerHTML=`<b>見直しノート</b><small>制度ノート${SYS.length}冊・年表・用語${GLOSS.length}語</small>`}}
 {const _n=notes;notes=function(){_n();const s=$.querySelector(".strip span");if(s&&s.textContent==="まとめノート")s.textContent="見直しノート"}}
+
+/* ===================== 解答と制度ノートをつなぐ ===================== */
+const SYS_SEC={one:"ひとことで",who:"加入",pay:"お金・負担",get:"給付・ルール",proc:"手続き",nums:"数字"};
+const MIXUPS=[
+ {re:/資格取得届|資格喪失届|被扶養者|賞与支払届|離職証明|届出の期限|5日以内|10日以内|翌月10日/,t:"届出の期限",l:["健康保険・厚生年金（取得・喪失・扶養・賞与）：5日以内","雇用保険の資格取得届：翌月10日まで","雇用保険の資格喪失届・適用事業所設置届・労働保険の成立届：10日以内","源泉所得税・住民税の納付：翌月10日"]},
+ {re:/傷病手当金|休業補償|休業（補償）|待期/,t:"休んだときのお金",l:["仕事以外の病気・けが → 健康保険の傷病手当金：4日目から3分の2","仕事中・通勤中 → 労災の休業補償：4日目から60%＋特別支給金20%","業務災害の最初の3日は、会社が平均賃金の60%以上を補償"]},
+ {re:/育児休業給付|出産手当金|出生後休業|育児時短就業|介護休業給付/,t:"休業中の給付の割合",l:["出産手当金（健康保険）：3分の2","育児休業給付金（雇用保険）：67% → 181日目から50%","出生後休業支援給付金：13%上乗せ（手取り10割相当）","育児時短就業給付金：10%／介護休業給付金：67%"]},
+ {re:/130万|178万|160万|150万|180万|106万|年収の壁/,t:"年収の壁",l:["130万円：社会保険の扶養から外れる","178万円：本人に所得税がかかり始める（2026年分）","150万円：19〜22歳の子の扶養／180万円：60歳以上の扶養","106万円：2026年10月1日に賃金要件が撤廃"]},
+ {re:/75歳|70歳|65歳|高年齢被保険者|加入できる年齢/,t:"加入できる年齢",l:["健康保険：75歳まで（その後は後期高齢者医療）","厚生年金：70歳まで","雇用保険：65歳以上も高年齢被保険者として加入"]},
+ {re:/割増|深夜|休日労働|法定休日/,t:"割増賃金の率",l:["時間外：25%（月60時間超は50%）","法定休日：35%／深夜（22〜5時）：25%","休日労働に時間外は重ならない（休日に10時間働いても35%）"]},
+ {re:/36協定|45時間|360時間|720時間|100時間|80時間|上限規制/,t:"残業の上限",l:["原則：月45時間・年360時間","特別条項：年720時間（休日労働は含まない）","単月100時間未満・2〜6か月平均80時間以内（休日労働を含む）"]},
+ {re:/算定基礎|月額変更|随時改定|定時決定|年度更新/,t:"算定基礎届と年度更新",l:["算定基礎届（社会保険）：7月1日〜10日・年金事務所。4〜6月の平均で9月分から","月額変更届：固定的賃金が変わり2等級以上の差 → 4か月目から","年度更新（労働保険＝労災＋雇用）：6月1日〜7月10日・労働局など"]},
+ {re:/有休|有給|年次有給/,t:"有給休暇の数字",l:["6か月勤務・出勤率8割で10日","10日以上の人は年5日の取得が義務","時効2年／時間単位は年5日分まで"]},
+ {re:/産前|産後|産休/,t:"産休の期間",l:["産前：6週間（多胎14週）・本人の請求で","産後：8週間（6週間は強制）","出産手当金：産前42日・産後56日"]},
+ {re:/育児休業|育休|パパ育休|パパ・ママ/,t:"育休の期間",l:["育児休業：原則1歳まで（延長で最長2歳）・2回に分割可","産後パパ育休：出生後8週間以内に最大4週間・2回に分割可","パパ・ママ育休プラス：1歳2か月まで"]},
+ {re:/介護休業|介護休暇/,t:"介護の休み",l:["介護休業：対象家族1人につき通算93日・3回まで（給付67%）","介護休暇：年5日（2人以上10日）・時間単位可"]},
+ {re:/解雇予告|休業手当|平均賃金/,t:"平均賃金を使う場面",l:["解雇予告：30日前か30日分以上の予告手当","会社都合の休業：平均賃金の60%以上の休業手当","平均賃金＝直前3か月の賃金総額÷暦日数"]},
+ {re:/源泉|納期の特例|住民税|特別徴収/,t:"税金の天引きと納付",l:["源泉所得税：翌月10日（10人未満は納期の特例で年2回）","住民税：6月〜翌年5月の12回で天引き・翌月10日に納付","年末調整のあと、源泉徴収票は1月31日までに本人へ"]},
+ {re:/料率|保険料率|折半|全額会社|子ども・子育て/,t:"だれがいくら払うか",l:["厚生年金18.3%・健康保険（協会けんぽ平均9.9%）：会社と本人で半分ずつ","雇用保険1.35%：本人0.5%・会社0.85%","労災保険・子ども・子育て拠出金：全額会社"]},
+ {re:/年金事務所|ハローワーク|労働基準監督署|労基署|提出先|窓口/,t:"届け出る場所",l:["健康保険・厚生年金 → 年金事務所","雇用保険 → ハローワーク","労災の給付・36協定・就業規則 → 労基署","年度更新 → 労働局・労基署・金融機関"]},
+ {re:/有期|無期転換|雇止め/,t:"有期契約の数字",l:["有期契約の上限：原則3年（専門職・60歳以上は5年）","無期転換：通算5年超で本人が申し込めば会社は拒めない","雇止めの予告：3回以上更新または1年超なら30日前"]},
+ {re:/50人|産業医|衛生管理者|ストレスチェック|衛生委員会|10人以上/,t:"人数で変わる義務",l:["10人以上：就業規則の作成・届出","50人以上：産業医・衛生管理者・衛生委員会・ストレスチェック","37.5人以上：障害者雇用（法定雇用率2.7%）"]},
+ {re:/最低賃金/,t:"最低賃金",l:["2026年度の全国加重平均：1,177円","比べるときに除く：通勤・家族・精皆勤手当、割増賃金、賞与","月給制は時給に換算して比べる"]},
+ {re:/退職所得|退職金/,t:"退職金の税金",l:["退職所得控除：20年以下は40万円×年数（最低80万円）","20年超：800万円＋70万円×（年数−20）","（退職金−控除）×2分の1に課税"]}];
+const sysGrams=s=>{const m=String(s).replace(/<[^>]+>/g,"").match(/[一-龯々ァ-ヶー0-9０-９%％]+/g)||[],g=new Set();m.forEach(w=>{if(w.length===1)return;for(let j=0;j<w.length-1;j++)g.add(w.slice(j,j+2))});return g};
+function sysRows(N){const o=[];["who","pay","get","proc","nums"].forEach(sec=>(N[sec]||[]).forEach(r=>o.push({sec,txt:sec==="proc"?`${r[0]}：${r[1]} → ${r[2]}（${r[3]}）`:`${r[0]}：${r[1]}`})));return o}
+function sysMatch(q){const text=q.q+" "+q.a+" "+(q.e||""),qg=sysGrams(text);
+  return SYS.map(N=>{const hits=(text.match(new RegExp(N.re.source,"g"))||[]).length;if(!hits)return null;
+    const rows=sysRows(N).map(r=>{const g=sysGrams(r.txt);let s=0;g.forEach(x=>{if(qg.has(x))s++});return{...r,s:s/Math.sqrt(Math.max(4,g.size))}}).sort((a,b)=>b.s-a.s);
+    return{N,hits,rows,score:hits+(rows[0]?rows[0].s:0)}}).filter(Boolean).sort((a,b)=>b.score-a.score).slice(0,2)}
+function sysMix(q){const text=q.q+" "+q.a+" "+(q.e||"");let best=null,bs=0;MIXUPS.forEach(M=>{const n=(text.match(new RegExp(M.re.source,"g"))||[]).length;if(n>bs){bs=n;best=M}});return best}
+function sysHTML(q,mini){const ms=sysMatch(q);if(!ms.length)return"";const top=ms[0],seen=new Set(),set=top.rows.filter(r=>r.s>=.6).filter(r=>{const k=r.txt.split("：")[0];if(seen.has(k))return false;seen.add(k);return true}).slice(0,3),mx=sysMix(q);
+  const tags=ms.map((m,j)=>{const sec=j===0&&set[0]?set[0].sec:(m.rows[0]&&m.rows[0].s>=.6?m.rows[0].sec:"one");return `<button class="systag" data-sn="${m.N.id}" data-sc="${sec}">${m.N.t.replace(/（.*）/,"")}<small>› ${SYS_SEC[sec]}</small></button>`}).join("");
+  if(mini)return `<div class="sysx2"><div class="systags">${tags}</div>${mx?`<p class="sysmx1"><b>まちがえやすい：</b>${mx.l[0]}</p>`:""}</div>`;
+  return `<div class="sysx2"><div class="systags">${tags}</div>
+   ${set.length?`<div class="sysset"><b>セットで覚える</b><ul>${set.map(r=>`<li>${r.txt}</li>`).join("")}</ul></div>`:""}
+   ${mx?`<div class="sysmx"><b>まちがえやすい：${mx.t}</b><ul>${mx.l.map(x=>`<li>${x}</li>`).join("")}</ul></div>`:""}</div>`}
+function sysSecHTML(N,sec){if(sec==="one")return `<p class="sysone">${N.one}</p>`;
+  if(sec==="proc")return `<div class="tcards">${N.proc.map(([w,what,where,lim])=>`<div class="tcard"><small class="sysw">${w}</small><b>${what}</b><p><span>窓口</span>${where}</p><p><span>期限</span>${lim}</p></div>`).join("")}</div>`;
+  if(sec==="nums")return `<div class="sysnums">${N.nums.map(([k,v])=>`<div><small>${k}</small><b>${v}</b></div>`).join("")}</div>`;
+  return sysCards(N[sec]||[])}
+function sysSheet(id,sec){const N=sysOf(id);if(!N)return;
+  const draw=s=>openSheet(N.t,`<div class="chips dch syschips">${Object.entries(SYS_SEC).map(([k,n])=>`<button class="dchip ${k===s?"on":""}" data-ss2="${k}"><b>${n}</b></button>`).join("")}</div><div class="sysbody" style="margin-top:8px">${sysSecHTML(N,s)}</div>
+    <p class="pdn" style="margin-top:8px">関連：${N.rel.map(r=>`<button class="syslink" data-sn2="${r}">${sysOf(r).t.replace(/（.*）/,"")}</button>`).join(" ")}</p>`,
+    R=>{R.querySelectorAll("[data-ss2]").forEach(b=>b.onclick=()=>draw(b.dataset.ss2));R.querySelectorAll("[data-sn2]").forEach(b=>b.onclick=()=>sysSheet(b.dataset.sn2,"one"))});draw(sec||"one")}
+function bindSysTags(root){(root||document).querySelectorAll("[data-sn]").forEach(b=>{if(b.dataset.bound)return;b.dataset.bound=1;b.onclick=e=>{e.stopPropagation();sysSheet(b.dataset.sn,b.dataset.sc)}})}
+/* 解答のあと・問題図鑑：用語メモの前に入れる */
+{const _h=hrExtra;hrExtra=function(q,open){const x=q&&q.q?sysHTML(q):"";setTimeout(()=>bindSysTags(),0);return x+_h(q,false)}}
+/* ひとりの早押し対戦（人事労務） */
+{const _rr=rivalReveal;rivalReveal=function(){_rr.apply(this,arguments);try{const R=RV;const q=R&&R.qs[R.k];if(q&&q.id>=10000){const s=document.querySelector("#after .slip");if(s)s.insertAdjacentHTML("afterend",sysHTML(q,true));bindSysTags()}}catch(e){}}}
+/* みんなで対戦（人事労務）：正解発表に小さく */
+{const _pv=mpPlayView;mpPlayView=function(d){_pv(d);try{if(d.ph==="rev"&&d.co==="hr"){const q=d.qs[d.k],s=document.querySelector("#after .slip");if(s&&q)s.insertAdjacentHTML("afterend",sysHTML(q,true));bindSysTags()}}catch(e){}}}
+/* ノート側：まちがえた問題の数と、優先して出題 */
+const sysMissed=N=>POOL_HR.filter(q=>S.missed.includes(q.id)&&N.re.test(q.q+q.a)).length;
+{const _n=notes;notes=function(){_n();if(noteTab!=="制度")return;$.querySelectorAll(".drow[data-sys]").forEach(b=>{const n=sysMissed(sysOf(b.dataset.sys));if(n)b.querySelector(".dq b").insertAdjacentHTML("beforeend",`<em class="missb">まちがい ${n}</em>`)})}}
+{const _sp=sysPage;sysPage=function(id){_sp(id);const N=sysOf(id),sq=document.getElementById("sys-q");if(!N||!sq)return;const mi=sysMissed(N);
+  if(mi){const sm=sq.querySelector("small");if(sm)sm.textContent=`まちがえた${mi}問を優先して出題・通常試験として1か月すすむ`}
+  sq.onclick=()=>{if(deadNow())return;S.course="hr";save();const all=POOL_HR.filter(q=>N.re.test(q.q+q.a)),miss=shuffle(all.filter(q=>S.missed.includes(q.id))),rest=shuffle(all.filter(q=>!S.missed.includes(q.id)));
+    const pool=[...miss,...rest].slice(0,10);start("normal");qs=shuffle(pool).map(q=>({...q,opts:shuffle([q.a,...q.o])}));i=0;log=[];show()}}}
 
 S=load();S.srs=S.srs||{};Object.keys(S.streak||{}).forEach(id=>{if(+id>=10000&&!S.srs[id])S.srs[id]={b:Math.min(2,S.streak[id]),due:Date.now(),seen:Date.now()}});ensureLife();evolve();newBadges=[];save();home();
 </script>
