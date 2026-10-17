@@ -5669,10 +5669,10 @@ drawPet=function(cv,id,evolved){
     if(canWalk&&RP.mode){const o=rpStep(now,dt,W,g0);bob=o.bob||0;lift=o.lift||0}else if(canWalk){const R0=34;
       if(!busy){if(WK.mode==="idle"&&now>WK.until){const pl=wkPlan(now,W,R0,night);WK.tx=Math.max(-W/2+R0,Math.min(W/2-R0,pl.tx));WK.act=pl.act;WK.stay=pl.stay;WK.mode="walk"}
         if(WK.mode==="walk"){const d=WK.tx-WK.x,sp=58*dt;if(Math.abs(d)<=sp){WK.x=WK.tx;WK.mode="idle";WK.until=now+WK.stay}else{WK.x+=Math.sign(d)*sp;bob=Math.abs(Math.sin(t*11))*4}}}
-      if(WK.mode==="idle"&&now<WK.until){if(WK.act==="sit")lift=furnLift("sofa",H,k);if(WK.act==="sleep"){asleep=true;if(furnX("bed")!=null&&Math.abs(WK.x-(furnX("bed")*W-W/2))<14)lift=furnLift("bed",H,k)}}
+      if(WK.mode==="idle"&&now<WK.until){if(WK.act==="sit")lift=furnLift("sofa",H,k);if(WK.act==="sleep"){asleep=true;if(furnX("bed")!=null&&Math.abs(WK.x-(furnX("bed")*W-W/2))<14)lift=BED_LIFT}}
       if(night&&WK.mode==="idle"&&!petted)asleep=true}
     const px=W/2+(room?WK.x:0),g=g0-bob-lift;
-    ell(c,px,g0+2,58,8,"rgba(0,0,0,.14)");
+    if(!(room&&typeof furnShadow==="function"&&furnShadow(c,W,g0,px,g)))ell(c,px,g0+2,58,8,"rgba(0,0,0,.14)");
     const info={blink:asleep||(!reduce&&(t%3.8)<.13),look:WK.mode==="walk"?Math.sign(WK.tx-WK.x):WK.act==="watch"?Math.sign(((furnX("tank")||.5)*W-W/2)-WK.x):Math.sin(t*.7),happy:petted||bathing||(eating&&now-fx.eat.t0>1600),eat:eating&&now-fx.eat.t0<1600,sad:C.mood<25&&!petted,dirt:bathing?0:Math.max(0,(45-C.clean)/45),wear:S.life.wear,sick:!!S.life.sick&&!bathing};
     drawCreature(c,id,px,g,t,info);if(room&&typeof rpDraw==="function")rpDraw(c,W,H,g0,now,px,g,info);
     if(asleep&&!eating&&!bathing){c.fillStyle="#6b7bb5";c.font='900 16px "Zen Maru Gothic",sans-serif';[0,1,2].forEach(j=>{const a=((t*.6+j/3)%1);c.globalAlpha=1-a;c.fillText("z",px+info.R*.7+a*18+j*4,g-info.R*1.8-a*30);c.globalAlpha=1})}
@@ -6670,7 +6670,7 @@ function rpStep(now,dt,W,g0){RP.geo={W,g0};const half=W/2-34;let bob=0,lift=0;
   if(RP.mode==="held"){WK.x=Math.max(-half,Math.min(half,RP.hx-W/2));WK.mode="idle";lift=Math.max(0,g0-RP.hy-20);bob=Math.sin(now/90)*2}
   else if(RP.mode==="drop"){const D=RP.drop,p=(now-D.t)/420;if(p<1)lift=D.h*(1-p)*(1-p);else if(p<1.6)lift=Math.abs(Math.sin((p-1)/.6*Math.PI))*10*(1.6-p)/.6;
     else{RP.mode=null;WK.mode="idle";if(D.act){WK.act=D.act;WK.until=now+8000;rpSay(D.act==="sleep"?"ふかふかのベッド…":"ふかふか〜");rpCap(1)}else{WK.act=null;WK.until=now+1500;rpSay("ぽよん！")}}
-    {const kk=+((document.getElementById("petcv")||{dataset:{}}).dataset.k)||1.5,Hl=g0+112/kk;if(D.act==="sit")lift+=furnLift("sofa",Hl,kk);if(D.act==="sleep")lift+=furnLift("bed",Hl,kk)}}
+    {const kk=+((document.getElementById("petcv")||{dataset:{}}).dataset.k)||1.5,Hl=g0+112/kk;if(D.act==="sit")lift+=furnLift("sofa",Hl,kk);if(D.act==="sleep")lift+=BED_LIFT}}
   else if(RP.mode==="fetch"){const b=RP.ball;if(RP.fetch==="go"){if(walkTo(b.x,105)){b.state="carried";RP.fetch="back";se("tap")}}
     else if(walkTo(b.home-26,80)){b.state="rest";b.x=b.home;b.y=g0-b.r;RP.mode=null;RP.fetch=null;WK.mode="idle";WK.act=null;WK.until=now+3000;rpHeart(W/2+WK.x,g0-70);rpSay("とってきたよ！");rpCap(2)}}
   return{bob,lift}}
@@ -6787,12 +6787,26 @@ drawFurn=function(cv){if(!cv)return;furnFit();const {c,W,H,dpr}=sizeCanvas(cv);c
   ["back0","back1"].forEach((s,j)=>{const id=F[s];if(id)place(id,smallX(id,j,W,sc),G.smallY,sc*.9,false)})};
 /* 動く家具（テレビ・水そう・植物・時計・夜のライト）は、へやを表示しているあいだ少しずつ描き直す */
 setInterval(()=>{try{if(document.hidden||!S||!S.life)return;const fc=document.querySelector(".scene .furncv");if(!fc)return;if(["tv","tank","plant","clock","lamp"].some(id=>hasF(id)))drawFurn(fc)}catch(e){}},250);
-/* ベッドで寝ているときは、ふとんをかける */
-function onBedNow(W,k){const b=furnX("bed");if(b==null||WK.mode!=="idle"||WK.act!=="sleep")return false;return Math.abs(WK.x-(b*W-W/2))<14}
-{const _rp=rpDraw;rpDraw=function(c,W,H,g0,now,px,g,info){_rp(c,W,H,g0,now,px,g,info);try{const cv=document.getElementById("petcv"),k=+(cv&&cv.dataset.k)||1.5;if(!onBedNow(W,k))return;
-  const Wc=W*k,sc=Math.max(1.15,Math.min(1.6,Wc/250)),R0=info.R||34,bw=Math.max(R0*2.3,62*sc/k),top=g-R0*.5,bot=g+5;
-  c.save();c.beginPath();c.roundRect?c.roundRect(px-bw/2,top,bw,bot-top,6):c.rect(px-bw/2,top,bw,bot-top);const gr=c.createLinearGradient(0,top,0,bot);gr.addColorStop(0,"#7fb3e8");gr.addColorStop(1,"#4b88c9");c.fillStyle=gr;c.fill();c.lineWidth=2.5;c.strokeStyle="#3a2e2a";c.stroke();
-  c.fillStyle="#fff";c.beginPath();c.roundRect?c.roundRect(px-bw/2,top,bw,8,4):c.rect(px-bw/2,top,bw,8);c.fill();c.stroke();c.strokeStyle="rgba(255,255,255,.45)";c.lineWidth=1.4;for(let i=1;i<4;i++){const x=px-bw/2+bw*i/4;c.beginPath();c.moveTo(x,top+10);c.quadraticCurveTo(x+4,(top+bot)/2,x,bot-2);c.stroke()}c.restore()}catch(e){}}}
+/* ベッドで寝ているときは、キャラに合わせた大きさのベッドに寝かせて、ふとんをかける（奥の小さいベッドは隠す） */
+const BED_LIFT=12;
+function onBedNow(W){const b=furnX("bed");if(b==null||WK.mode!=="idle"||WK.act!=="sleep")return false;return Math.abs(WK.x-(b*W-W/2))<14}
+function petW(){const cv=document.getElementById("petcv");if(!cv)return 0;const k=+cv.dataset.k||1.5;return cv.clientWidth/k}
+/* キャラの影のかわり：寝ているときはベッド、すわっているときは影なし */
+function furnShadow(c,W,g0,px,g){if(onBedNow(W)){const R=36,bw=Math.min(R*3.4,2*Math.min(px,W-px)-4),flip=furnX("bed")>.5,top=g0-BED_LIFT,ink="#3a2e2a";c.save();c.lineJoin="round";c.lineWidth=2.5;c.strokeStyle=ink;
+    c.fillStyle="rgba(0,0,0,.13)";c.beginPath();c.ellipse(px,g0+6,bw*.55,7,0,0,6.3);c.fill();
+    const hx=flip?px+bw/2-10:px-bw/2,g=c.createLinearGradient(0,top-R*1.6,0,g0+6);g.addColorStop(0,"#c48552");g.addColorStop(1,"#8a5a3c");
+    const RR=(x,y,w,h,f,r)=>{c.beginPath();c.roundRect?c.roundRect(x,y,w,h,r):c.rect(x,y,w,h);c.fillStyle=f;c.fill();c.stroke()};
+    RR(hx,top-R*1.5,10,R*1.5+BED_LIFT+6,g,4);RR(flip?px-bw/2:px+bw/2-8,top-R*.5,8,R*.5+BED_LIFT+6,g,3);
+    RR(px-bw/2+6,top-2,bw-12,BED_LIFT+2,"#fdfdfb",4);RR(px-bw/2+6,g0-2,bw-12,8,"#8a5a3c",2);
+    c.fillStyle="#eef3f8";c.beginPath();c.ellipse(flip?px+bw/2-30:px-bw/2+30,top-6,16,7,0,0,6.3);c.fill();c.stroke();c.restore();return true}
+  return g0-g>8}
+{const _df=drawFurn;drawFurn=function(cv){const P=furnL().put;let hid=null;try{if(onBedNow(petW())){for(const s in P)if(P[s]==="bed"){hid=s;P[s]=null}}}catch(e){}try{_df(cv)}finally{if(hid)P[hid]="bed"}}}
+{const _rp=rpDraw;rpDraw=function(c,W,H,g0,now,px,g,info){_rp(c,W,H,g0,now,px,g,info);try{if(!onBedNow(W))return;
+  const R0=info.R||34,bw=R0*2.6,top=g-R0*.55,bot=g0+2;
+  c.save();c.lineWidth=2.5;c.strokeStyle="#3a2e2a";c.beginPath();c.roundRect?c.roundRect(px-bw/2,top,bw,bot-top,8):c.rect(px-bw/2,top,bw,bot-top);const gr=c.createLinearGradient(0,top,0,bot);gr.addColorStop(0,"#7fb3e8");gr.addColorStop(1,"#4b88c9");c.fillStyle=gr;c.fill();c.stroke();
+  c.fillStyle="#fff";c.beginPath();c.roundRect?c.roundRect(px-bw/2,top,bw,9,5):c.rect(px-bw/2,top,bw,9);c.fill();c.stroke();c.strokeStyle="rgba(255,255,255,.45)";c.lineWidth=1.4;for(let i=1;i<4;i++){const x=px-bw/2+bw*i/4;c.beginPath();c.moveTo(x,top+11);c.quadraticCurveTo(x+4,(top+bot)/2,x,bot-2);c.stroke()}c.restore()}catch(e){}}}
+/* 寝る・起きるで奥のベッドの表示を切り替える */
+{let was=null;setInterval(()=>{try{const fc=document.querySelector(".scene .furncv");if(!fc||!hasF("bed"))return;const on=onBedNow(petW());if(on!==was){was=on;drawFurn(fc)}}catch(e){}},300)}
 
 /* ===================== 47都道府県の旅：データ ===================== */
 /* n:名前 cap:県庁所在地 r:地方 lm:写真の景色 ic:名産アイコン pl:名所 fd:名物料理 mi:おみやげ[名前,絵,f=食べ物/i=かざる] ev:[行事,月の配列,説明] mm:まめ知識 g:[列,行] */
