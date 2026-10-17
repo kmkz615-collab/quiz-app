@@ -1033,6 +1033,18 @@ dl.gl dd:last-child{border-bottom:0;padding-bottom:0}
 .qv{min-width:74px;text-align:center;font-size:17px}.qpre{display:flex;gap:4px;margin-left:auto}.qp{border:2px solid var(--line);background:#fff;border-radius:10px;padding:5px 8px;font-size:12px;font-weight:800;font-family:inherit;color:inherit}.qp.on{border-color:var(--ink);background:var(--ink);color:#fff}
 .qsum{font-size:12px;margin:6px 0 2px}.qsum .neg{color:var(--ng)}.qtyb .brow{margin-top:4px}
 .invmsg{background:#eaf7e4;border:2px solid #9fd88a;border-radius:12px;padding:6px 10px;font-size:13px;font-weight:700;margin:0 0 8px}
+/* ポートフォリオ */
+.pfcard{display:grid;grid-template-columns:1fr auto;gap:0 8px;width:100%;text-align:left;border:2px solid var(--ink);border-radius:14px;background:#f2f8ff;padding:8px 10px;margin:0 0 10px;font-family:inherit;color:inherit}
+.pfcard span{font-size:11px;font-weight:900;color:#3b6fb0}.pfcard b{font-size:17px}.pfcard small{font-size:11.5px;color:var(--muted)}.pfcard em{font-style:normal;font-weight:800}
+.pfcard i{grid-column:2;grid-row:1/4;align-self:center;font-style:normal;font-size:11px;font-weight:800;border:1.5px solid var(--line);border-radius:10px;padding:3px 8px;background:#fff}
+.pos{color:var(--ok)}.neg{color:var(--ng)}
+.pfsum{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:4px 0 8px}.pfsum div{background:#fff;border:2px solid var(--line);border-radius:10px;padding:5px 8px}.pfsum .w2{grid-column:1/3}
+.pfsum span{display:block;font-size:10.5px;color:var(--muted)}.pfsum b{font-size:15px}.pfsum b small{font-size:11px}
+.pfmix{display:flex;align-items:center;gap:10px;margin:4px 0}.pfmix ul{list-style:none;margin:0;padding:0;flex:1}.pfmix li{display:grid;grid-template-columns:12px 1fr auto;gap:0 6px;align-items:center;font-size:12.5px;padding:2px 0}
+.pfmix li i{width:11px;height:11px;border-radius:3px}.pfmix li small{grid-column:2/4;font-size:10.5px;color:var(--muted);margin-top:-2px}
+.pfwarn{background:#fff3e0;border:2px solid #f5a35c;border-radius:10px;padding:6px 10px;font-size:12.5px;line-height:1.5;margin:6px 0}
+.pfrows{display:flex;flex-direction:column;gap:5px}.pfr{display:grid;grid-template-columns:8px 1fr auto;gap:8px;align-items:center;text-align:left;border:2px solid var(--line);border-radius:12px;background:#fff;padding:6px 8px;font-family:inherit;color:inherit}
+.pfr>i{width:8px;height:32px;border-radius:4px}.pfn b{font-size:13px;display:block}.pfn small{font-size:10.5px;color:var(--muted)}.pfv{text-align:right}.pfv b{font-size:13.5px;display:block}.pfv small{font-size:10.5px;font-weight:700}
 </style>
 
 <div id="shell">
@@ -3980,7 +3992,7 @@ function monthTick(right){const L=S.life,lines=[],ev=[],C=S.care;const add=(t,v)
   const invBefore=investVal(L);
   MKT.forEach(m=>{let p=L.prices[m.id],r=m.mu-m.sd*m.sd/2+m.sd*gauss();if(m.shock&&Math.random()<.03)r+=Math.random()<.5?-.4:.35;
     p=Math.max(m.p0*.05,p*Math.exp(r));L.prices[m.id]=p;L.hist[m.id].push(p);if(L.hist[m.id].length>60)L.hist[m.id].shift();
-    if(m.div&&L.hold[m.id])add(`${m.name}の配当（税引後）`,L.hold[m.id]*p*m.div*.8)});
+    if(m.div&&L.hold[m.id])jpDiv(m,p,add)});
   if(isP("bold")&&invBefore>0&&investVal(L)>invBefore){C.mood=Math.min(100,C.mood+10);ev.push("持っている投資が値上がりして、冒険家の血がさわいでいる！")}
   if(isP("celeb")&&L.car==="sports"){C.mood=Math.min(100,C.mood+10)}
   Object.keys(S.trait).forEach(k=>S.trait[k]*=.95);
@@ -7139,6 +7151,40 @@ document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest
 {const _l=life;life=function(t,m){_l(t,m);try{qtyDecor()}catch(e){console.error(e)}
   try{const R=INV_RE;INV_RE=null;if(!R||Date.now()-R.t>3000||lifeTab!=="投資"||t)return;const lb=document.getElementById("lbody"),row=lb&&[...lb.querySelectorAll(".prow")].find(r=>(r.querySelector(".pn")||{}).textContent===R.name);if(!row)return;
     row.click();const shb=document.querySelector("#sheetRoot .shb");if(shb&&m)shb.insertAdjacentHTML("afterbegin",`<p class="invmsg">${m}</p>`)}catch(e){console.error(e)}}}
+
+/* ===================== ポートフォリオ（保有資産の確認） ===================== */
+/* 日本株の配当：NISAの分は非課税、ふつうの口座は約20%（月ごとに支払い） */
+function jpDiv(m,p,add){const L=S.life,h=L.hold[m.id]||0;if(!h)return;const N=nisaS(),nu=Math.min(h,N.u[m.id]||0),g=h*p*m.div,gn=g*nu/h,v=gn+(g-gn)*.8;
+  add(`${m.name}の配当（${nu?nu<h?"NISA分は非課税・残りは税引後":"NISAで非課税":"税引後"}）`,v);L.divSum=(L.divSum||0)+v}
+{const _mt=monthTick;monthTick=function(r){const L=S.life;const out=_mt(r);try{(out.lines||[]).forEach(([t,v])=>{if(/^.+の配当（ドル→円/.test(t))L.divSum=(L.divSum||0)+v})}catch(e){}return out}}
+const PF_CAT=[["預金","#8fc3e8"],["投資信託","#9fd88a"],["日本株","#f5a35c"],["米国株","#e8889a"]];
+function pfData(){const L=S.life,N=nisaS(),U=typeof usS==="function"?usS():null,rows=[];
+  MKT.forEach(m=>{const u=L.hold[m.id]||0;if(!u)return;const p=L.prices[m.id],val=u*p,cost=L.cost[m.id]||0,nu=Math.min(u,N.u[m.id]||0),cat=m.us?"米国株":m.kind==="投資信託"?"投資信託":"日本株";
+    let dv=0;if(m.div){const g=u*p*m.div*12,gn=g*nu/u;dv=gn+(g-gn)*.8}if(m.us&&U){const g=u*U.dps[m.id]*U.fx,gn=g*nu/u;dv=gn*.9+(g-gn)*.72}
+    rows.push({m,u,val,cost,pl:val-cost,nu,nval:nu*p,cat,dv})});
+  rows.sort((a,b)=>b.val-a.val);const dep=L.dep.normal+L.dep.fixed,inv=rows.reduce((a,r)=>a+r.val,0),cost=rows.reduce((a,r)=>a+r.cost,0);
+  const cats={預金:dep,投資信託:0,日本株:0,米国株:0};rows.forEach(r=>cats[r.cat]+=r.val);
+  return {rows,dep,inv,cost,pl:inv-cost,nval:rows.reduce((a,r)=>a+r.nval,0),cats,total:dep+inv,dv:rows.reduce((a,r)=>a+r.dv,0)}}
+const pfPct=(a,b)=>b?(a/b*100):0;
+const pfSgn=v=>(v>=0?"+":"")+YEN(v).replace("−","−");
+function pfDonut(cats,total){if(!total)return"";let a=-Math.PI/2;const R=46,r=28,cx=56,cy=56;
+  const seg=PF_CAT.map(([k,col])=>{const v=cats[k];if(!v)return"";const f=v/total;if(f>.9999)return `<circle cx="${cx}" cy="${cy}" r="${(R+r)/2}" fill="none" stroke="${col}" stroke-width="${R-r}"/>`;
+    const a2=a+f*Math.PI*2,lg=f>.5?1:0,P=(rr,t)=>`${(cx+rr*Math.cos(t)).toFixed(2)},${(cy+rr*Math.sin(t)).toFixed(2)}`;const d=`M${P(R,a)}A${R},${R} 0 ${lg} 1 ${P(R,a2)}L${P(r,a2)}A${r},${r} 0 ${lg} 0 ${P(r,a)}Z`;a=a2;return `<path d="${d}" fill="${col}" stroke="#fff" stroke-width="1.5"/>`}).join("");
+  return `<svg viewBox="0 0 112 112" width="112" height="112" aria-hidden="true">${seg}</svg>`}
+function pfCard(){const D=pfData();if(!D.total)return"";return `<button class="pfcard" id="pf-open"><span>ポートフォリオ</span><b>${YEN(D.total)}</b><small>投資の損益 <em class="${D.pl<0?"neg":"pos"}">${pfSgn(D.pl)}（${D.cost?(D.pl>=0?"+":"")+pfPct(D.pl,D.cost).toFixed(1):"0.0"}%）</em></small><i>見る</i></button>`}
+function pfSheet(){const D=pfData(),L=S.life,top=D.rows[0];
+  const warn=top&&D.inv>0&&top.val/D.inv>.5&&D.rows.length>=1?`<p class="pfwarn">投資の${pfPct(top.val,D.inv).toFixed(0)}%が「${top.m.name}」に集中しています。いくつかに分けて持つと、値下がりしたときの影響が小さくなります。</p>`:"";
+  openSheet("ポートフォリオ",`<div class="pfsum"><div><span>預金＋投資の合計</span><b>${YEN(D.total)}</b></div><div><span>投資の評価額</span><b>${YEN(D.inv)}</b></div><div><span>買った金額</span><b>${YEN(D.cost)}</b></div><div><span>損益</span><b class="${D.pl<0?"neg":"pos"}">${pfSgn(D.pl)}<small>（${D.cost?(D.pl>=0?"+":"")+pfPct(D.pl,D.cost).toFixed(1):"0.0"}%）</small></b></div>${D.nval?`<div class="w2"><span>うちNISA</span><b>${YEN(D.nval)}</b></div>`:""}</div>
+   <div class="pfmix">${pfDonut(D.cats,D.total)}<ul>${PF_CAT.map(([k,col])=>`<li><i style="background:${col}"></i><span>${k}</span><b>${pfPct(D.cats[k],D.total).toFixed(1)}%</b><small>${YEN(D.cats[k])}</small></li>`).join("")}</ul></div>
+   ${warn}
+   <h4 class="fh">銘柄ごと<small>タップで売り買いの画面へ</small></h4>
+   ${D.rows.length?`<div class="pfrows">${D.rows.map(r=>{const fund=r.m.kind==="投資信託",q=fund?Math.round(r.u*10000).toLocaleString("ja-JP")+"口":r.u.toLocaleString("ja-JP")+"株";
+     return `<button class="pfr" data-pfk="${esc(r.m.name)}"><i style="background:${(PF_CAT.find(c=>c[0]===r.cat)||[0,"#ccc"])[1]}"></i><div class="pfn"><b>${r.m.name}</b><small>${q}${r.nu?`（うちNISA ${fund?Math.round(r.nu*10000).toLocaleString("ja-JP")+"口":r.nu.toLocaleString("ja-JP")+"株"}）`:""}・${pfPct(r.val,D.total).toFixed(1)}%</small></div><div class="pfv"><b>${YEN(r.val)}</b><small class="${r.pl<0?"neg":"pos"}">${pfSgn(r.pl)}（${r.cost?(r.pl>=0?"+":"")+pfPct(r.pl,r.cost).toFixed(1):"0.0"}%）</small></div></button>`}).join("")}</div>`:`<p class="pdn">まだ投資信託や株を持っていません。</p>`}
+   <h4 class="fh">配当</h4><div class="pfsum"><div><span>これから1年の見込み（税引後）</span><b>${YEN(D.dv)}</b></div><div><span>これまでに受け取った合計</span><b>${YEN(L.divSum||0)}</b></div></div>
+   <p class="pdn">見込みは、いまの株価・配当・為替が続いた場合の目安です。受け取った合計は、この画面ができてから数えています。</p>`,R=>{
+    R.querySelectorAll("[data-pfk]").forEach(b=>b.onclick=()=>{const n=b.dataset.pfk;closeSheet();const lb=document.getElementById("lbody"),row=lb&&[...lb.querySelectorAll(".prow")].find(x=>(x.querySelector(".pn")||{}).textContent===n);if(row)row.click()})})}
+{const _l=life;life=function(t,m){_l(t,m);try{if(lifeTab!=="投資")return;const lb=document.getElementById("lbody");if(!lb||lb.querySelector(".pfcard"))return;const h=pfCard();if(!h)return;
+  const nb=lb.querySelector(".newsbox");if(nb)nb.insertAdjacentHTML("afterend",h);else lb.insertAdjacentHTML("afterbegin",h);document.getElementById("pf-open").onclick=pfSheet}catch(e){console.error(e)}}}
 
 S=load();S.srs=S.srs||{};Object.keys(S.streak||{}).forEach(id=>{if(+id>=10000&&!S.srs[id])S.srs[id]={b:Math.min(2,S.streak[id]),due:Date.now(),seen:Date.now()}});ensureLife();evolve();newBadges=[];save();home();
 </script>
