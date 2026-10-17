@@ -1020,6 +1020,13 @@ dl.gl dd:last-child{border-bottom:0;padding-bottom:0}
 .tnr{border:2px solid var(--line);border-radius:12px;margin:6px 0;background:#fff}.tnr summary{padding:8px 10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none}.tnr summary::-webkit-details-marker{display:none}
 .tnr summary small{font-size:12px;color:var(--muted)}.tnp{border-top:1px dashed var(--line);padding:6px 10px}.tnp.no{opacity:.55}.tnph{display:flex;justify-content:space-between;align-items:baseline}.tnph small{font-size:11px;color:var(--muted)}
 .mml{font-size:12.5px;line-height:1.5;margin:3px 0;padding-left:14px;position:relative}.mml:before{content:"●";position:absolute;left:0;color:#e8b04a;font-size:9px;top:3px}.mml.no{color:var(--muted)}
+/* 経済ニュース・米国株 */
+.newsbox{display:grid;grid-template-columns:1fr auto;gap:0 8px;width:100%;text-align:left;border:2px solid var(--ink);border-radius:14px;background:#fffaf0;padding:8px 10px;margin:0 0 10px;font-family:inherit;color:inherit}
+.newsbox span{font-size:11px;font-weight:900;color:#c98a1a;grid-column:1}.newsbox b{font-size:14px;grid-column:1}.newsbox small{font-size:11.5px;color:var(--muted);grid-column:1}
+.newsbox i{grid-column:2;grid-row:1/4;align-self:center;font-style:normal;font-size:11px;font-weight:800;border:1.5px solid var(--line);border-radius:10px;padding:3px 8px;background:#fff}
+.newsc{border-bottom:1px dashed var(--line);padding:8px 0}.newsc small{font-size:11px;color:var(--muted);display:block}.newsc b{font-size:14px;display:block}.newsc span{font-size:12px;font-weight:800;color:var(--mark)}.newsc p{font-size:12.5px;line-height:1.55;margin:3px 0 0}
+.fxline{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;border:2px solid var(--line);border-radius:12px;background:#eef6ff;padding:6px 10px;margin:4px 0}.fxline span{font-size:11px;font-weight:900;color:#3b6fb0}.fxline b{font-size:16px}.fxline small{font-size:11px;color:var(--muted)}
+.usnote{font-size:11.5px!important}.usinfo{font-size:11.5px;font-weight:700;color:#3b6fb0;margin:2px 0 4px}
 </style>
 
 <div id="shell">
@@ -4064,7 +4071,7 @@ function lifeBody(){const L=S.life;
       return `<div class="prod"><div class="ph"><b>${m.name}</b><span class="chip">${m.kind}</span></div><p class="pd">${m.desc}</p>
       <div class="pgrid"><div><span>${fund?"基準価額（1万口）":"株価（1株）"}</span><b>${YEN(p)}</b><small class="${ch<0?"neg":"pos"}">${ch>=0?"+":""}${ch.toFixed(1)}%</small></div>${spark(h,120,40,ch<0?"var(--ng)":"var(--ok)")}</div>
       ${u?`<div class="pv"><span>保有 ${fund?(u*10000).toLocaleString("ja-JP",{maximumFractionDigits:0})+"口":u.toLocaleString("ja-JP")+"株"}</span><b>${YEN(val)}</b><small class="${pl<0?"neg":"pos"}">損益 ${pl>=0?"+":""}${YEN(pl)}</small></div>`:""}
-      <div class="brow">${fund?`<button class="sbtn" data-a="buyf" data-k="${m.id}" data-v="10000">1万円買う</button><button class="sbtn" data-a="buyf" data-k="${m.id}" data-v="100000">10万円買う</button><button class="sbtn" data-a="buyf" data-k="${m.id}" data-v="1000000">100万円買う</button>`:`<button class="sbtn" data-a="buys" data-k="${m.id}">100株買う（${YEN(p*100)}）</button>`}${u?`<button class="sbtn ghost" data-a="sell" data-k="${m.id}">全部売る</button>`:""}</div></div>`}).join("")}`}
+      <div class="brow">${fund?`<button class="sbtn" data-a="buyf" data-k="${m.id}" data-v="10000">1万円買う</button><button class="sbtn" data-a="buyf" data-k="${m.id}" data-v="100000">10万円買う</button><button class="sbtn" data-a="buyf" data-k="${m.id}" data-v="1000000">100万円買う</button>`:`<button class="sbtn" data-a="buys" data-k="${m.id}">${m.lot||100}株買う（${YEN(p*(m.lot||100))}）</button>`}${u?`<button class="sbtn ghost" data-a="sell" data-k="${m.id}">全部売る</button>`:""}</div></div>`}).join("")}`}
   if(lifeTab==="家と車"){const cur=L.house?HOUSES[L.house].name:"ダンボールの家";
     const hcard=(k)=>{const h=HOUSES[k],own=L.house===k;if(k==="apt")return `<div class="prod"><div class="ph"><b>${h.name}</b>${own?`<span class="chip on">住んでいる</span>`:""}</div><p class="pd">家賃は毎月${YEN(h.rent)}。入居時に敷金・礼金として${YEN(h.init)}かかります。${HEFF.apt.note}（ダンボールの家よりきげんが下がりにくく、病気にもなりにくい）。</p>
       <div class="brow">${own?`<button class="sbtn ghost" data-a="leave">退去する</button>`:`<button class="sbtn" data-a="rent">借りる</button>`}</div></div>`;
@@ -4111,7 +4118,7 @@ function bindLife(){const L=S.life;
     if(a==="dep"){const amt=v==="all"?Math.max(0,L.cash):+v;if(amt<=0||L.cash<amt)return "所持金が足りません。";L.cash-=amt;L.dep[k]+=amt;return `${DEP[k].name}に${YEN(amt)}預けました。`}
     if(a==="wd"){const amt=L.dep[k];L.cash+=amt;L.dep[k]=0;return `${YEN(amt)}引き出しました。`}
     if(a==="buyf"){const amt=+v;if(L.cash<amt)return "所持金が足りません。";L.cash-=amt;L.hold[k]=(L.hold[k]||0)+amt/L.prices[k];L.cost[k]=(L.cost[k]||0)+amt;award("invest");return `${MKT.find(m=>m.id===k).name}を${YEN(amt)}分買いました。`}
-    if(a==="buys"){const amt=L.prices[k]*100;if(L.cash<amt)return "所持金が足りません。";L.cash-=amt;L.hold[k]=(L.hold[k]||0)+100;L.cost[k]=(L.cost[k]||0)+amt;award("invest");return `${MKT.find(m=>m.id===k).name}を100株買いました。`}
+    if(a==="buys"){const lt=MKT.find(m=>m.id===k).lot||100,amt=L.prices[k]*lt;if(L.cash<amt)return "所持金が足りません。";L.cash-=amt;L.hold[k]=(L.hold[k]||0)+lt;L.cost[k]=(L.cost[k]||0)+amt;award("invest");return `${MKT.find(m=>m.id===k).name}を${lt}株買いました。`}
     if(a==="sell"){const val=(L.hold[k]||0)*L.prices[k],gain=val-(L.cost[k]||0),tax=Math.max(0,gain)*.2;L.cash+=val-tax;L.hold[k]=0;L.cost[k]=0;return `${YEN(val)}で売りました。${gain>=0?`利益 ${YEN(gain)} に対して税金 ${YEN(tax)}。`:`損失 ${YEN(-gain)}（税金はかかりません）。`}`}
     if(a==="rent"){if(L.house&&L.house!=="apt")return "持ち家に住んでいます。先に家を売ってください。";if(L.cash<HOUSES.apt.init)return "敷金・礼金が足りません。";L.cash-=HOUSES.apt.init;L.house="apt";return "賃貸アパートに引っ越しました。"}
     if(a==="leave"){L.house=null;return "アパートを退去しました。"}
@@ -6131,10 +6138,10 @@ const NISA_T=1200000,NISA_G=2400000,NISA_LIFE=18000000;
 function nisaS(){const L=S.life;L.nisa=L.nisa||{u:{},c:{},used:0,y:-1,t:0,g:0,auto:null};const N=L.nisa,y=Math.floor((L.month-1)/12);if(N.y!==y){N.y=y;N.t=0;N.g=0}return N}
 function nisaRoom(kind){const N=nisaS(),life=NISA_LIFE-N.used;return Math.max(0,Math.min(life,kind==="t"?NISA_T-N.t:NISA_G-N.g))}
 function nisaBuy(k,amtWant){const L=S.life,N=nisaS(),m=MKT.find(x=>x.id===k);if(!m)return"";if(L.welfare)return"生活保護を受けている間は投資できません。";
-  const fund=m.kind==="投資信託",amt=fund?amtWant:L.prices[k]*100;if(L.cash<amt)return"所持金が足りません。";
+  const fund=m.kind==="投資信託",lot=m.lot||100,amt=fund?amtWant:L.prices[k]*lot;if(L.cash<amt)return"所持金が足りません。";
   let t=0,g=0;if(fund){t=Math.min(amt,nisaRoom("t"));g=amt-t}else g=amt;if(g>nisaRoom("g")||(t+g)>NISA_LIFE-N.used)return fund?"NISAの枠が足りません（今年のつみたて枠・成長枠、または生涯の枠）。":"成長投資枠が足りません。";
-  const u=fund?amt/L.prices[k]:100;L.cash-=amt;L.hold[k]=(L.hold[k]||0)+u;L.cost[k]=(L.cost[k]||0)+amt;N.u[k]=(N.u[k]||0)+u;N.c[k]=(N.c[k]||0)+amt;N.t+=t;N.g+=g;N.used+=amt;
-  award("invest");gambleDown(1.5);return `NISAで${m.name}を${fund?YEN(amt)+"分":"100株"}買いました（${t?"つみたて枠":""}${t&&g?"・":""}${g?"成長枠":""}）。`}
+  const u=fund?amt/L.prices[k]:lot;L.cash-=amt;L.hold[k]=(L.hold[k]||0)+u;L.cost[k]=(L.cost[k]||0)+amt;N.u[k]=(N.u[k]||0)+u;N.c[k]=(N.c[k]||0)+amt;N.t+=t;N.g+=g;N.used+=amt;
+  award("invest");gambleDown(1.5);return `NISAで${m.name}を${fund?YEN(amt)+"分":lot+"株"}買いました（${t?"つみたて枠":""}${t&&g?"・":""}${g?"成長枠":""}）。`}
 /* 売るとき：NISAの分は利益に税金がかからない */
 function nisaSell(k){const L=S.life,N=nisaS(),p=L.prices[k],u=L.hold[k]||0;if(!u)return"";const nu=Math.min(u,N.u[k]||0),nc=N.c[k]||0;
   const val=u*p,nval=nu*p,tval=val-nval,tcost=(L.cost[k]||0)-nc,tgain=tval-tcost,tax=Math.max(0,tgain)*.2,ngain=nval-nc;
@@ -6153,7 +6160,7 @@ function nisaHTML(){const N=nisaS(),A=N.auto;
 function nisaDecor(){const L=S.life,lb=document.getElementById("lbody");if(!lb)return;const N=nisaS();
   const h2=[...lb.querySelectorAll("h2")].find(h=>/投資信託と株/.test(h.textContent));if(h2&&!lb.querySelector(".nisa"))h2.insertAdjacentHTML("afterend",nisaHTML());
   lb.querySelectorAll(".prod").forEach(pr=>{const sb=pr.querySelector('[data-a="sell"],[data-a="buyf"],[data-a="buys"]');if(!sb)return;const k=sb.dataset.k,m=MKT.find(x=>x.id===k);if(!m)return;const fund=m.kind==="投資信託",brow=pr.querySelector(".brow");
-    if(brow&&!brow.querySelector("[data-nb]"))brow.insertAdjacentHTML("beforeend",fund?`<button class="sbtn nb" data-nb="${k}" data-v="10000">NISAで1万円</button><button class="sbtn nb" data-nb="${k}" data-v="100000">NISAで10万円</button>`:`<button class="sbtn nb" data-nb="${k}">NISAで100株</button>`);
+    if(brow&&!brow.querySelector("[data-nb]"))brow.insertAdjacentHTML("beforeend",fund?`<button class="sbtn nb" data-nb="${k}" data-v="10000">NISAで1万円</button><button class="sbtn nb" data-nb="${k}" data-v="100000">NISAで10万円</button>`:`<button class="sbtn nb" data-nb="${k}">NISAで${m.lot||100}株</button>`);
     const nu=N.u[k]||0;if(nu){const pv=pr.querySelector(".pv span");if(pv&&!pv.querySelector(".nisau"))pv.insertAdjacentHTML("beforeend",`<em class="nisau">（うちNISA ${fund?Math.round(nu*10000).toLocaleString("ja-JP")+"口":nu.toLocaleString("ja-JP")+"株"}）</em>`)}
     const sl=pr.querySelector('[data-a="sell"]');if(sl)sl.onclick=()=>{const m2=nisaSell(k);save();life(null,m2)}});
   lb.querySelectorAll("[data-nb]").forEach(b=>b.onclick=()=>{const m2=nisaBuy(b.dataset.nb,+b.dataset.v||0);save();life(null,m2)});
@@ -6487,7 +6494,7 @@ function casinoDecor(){if(lifeTab!=="カジノ"||!["スロット","ルーレッ�
 const SELL_ACCT={};
 function sellPart(k,mode){const L=S.life,N=nisaS(),m=MKT.find(x=>x.id===k),p=L.prices[k],u=L.hold[k]||0;if(!m||!u)return"";const fund=m.kind==="投資信託";
   const nu=Math.min(u,N.u[k]||0),tu=u-nu,acct=SELL_ACCT[k]||(tu>0?"t":"n"),avail=acct==="n"?nu:tu;if(avail<=0)return acct==="n"?"NISAで持っている分はありません。":"ふつうの口座で持っている分はありません。";
-  let x=mode==="all"?avail:mode==="half"?avail/2:fund?(+mode)/p:+mode;if(!fund){x=mode==="all"?avail:Math.floor(x/100)*100;if(x<100)x=Math.min(100,avail)}x=Math.min(x,avail);if(x<=0)return"";
+  let x=mode==="all"?avail:mode==="half"?avail/2:fund?(+mode)/p:+mode;if(!fund){const lot=m.lot||100;x=mode==="all"?avail:Math.floor(x/lot)*lot;if(x<lot)x=Math.min(lot,avail)}x=Math.min(x,avail);if(x<=0)return"";
   const val=x*p;let tax=0,gain=0;
   if(acct==="n"){const cp=(N.c[k]||0)*x/nu;gain=val-cp;N.u[k]=nu-x;N.c[k]=(N.c[k]||0)-cp;N.used=Math.max(0,N.used-cp);L.cost[k]=(L.cost[k]||0)-cp}
   else{const tc=(L.cost[k]||0)-(N.c[k]||0),cp=tc*x/tu;gain=val-cp;tax=Math.max(0,gain)*.2;L.cost[k]=(L.cost[k]||0)-cp}
@@ -6498,7 +6505,7 @@ function sellDecor(){if(lifeTab!=="投資")return;const L=S.life,N=nisaS(),lb=do
     if(!SELL_ACCT[k])SELL_ACCT[k]=tu>0?"t":"n";const ac=SELL_ACCT[k];
     const box=document.createElement("div");box.className="sellbox";
     box.innerHTML=`<b>売る</b>${nu>0&&tu>0?`<div class="seg sseg two"><button class="segb ${ac==="t"?"on":""}" data-sac="t">ふつうの口座から</button><button class="segb ${ac==="n"?"on":""}" data-sac="n">NISAから</button></div>`:""}
-     <div class="brow">${fund?`<button class="sbtn ghost" data-sp="10000">1万円分</button><button class="sbtn ghost" data-sp="100000">10万円分</button>`:`<button class="sbtn ghost" data-sp="100">100株</button>`}<button class="sbtn ghost" data-sp="half">半分</button><button class="sbtn ghost" data-sp="all">全部</button></div>`;
+     <div class="brow">${fund?`<button class="sbtn ghost" data-sp="10000">1万円分</button><button class="sbtn ghost" data-sp="100000">10万円分</button>`:`<button class="sbtn ghost" data-sp="${m.lot||100}">${m.lot||100}株</button>`}<button class="sbtn ghost" data-sp="half">半分</button><button class="sbtn ghost" data-sp="all">全部</button></div>`;
     sl.closest(".brow").after(box);sl.remove();
     box.querySelectorAll("[data-sac]").forEach(b=>b.onclick=()=>{SELL_ACCT[k]=b.dataset.sac;box.querySelectorAll("[data-sac]").forEach(x=>x.classList.toggle("on",x===b))});
     box.querySelectorAll("[data-sp]").forEach(b=>b.onclick=()=>{const msg=sellPart(k,b.dataset.sp);closeSheet();life(null,msg)})})}
@@ -7034,6 +7041,68 @@ REG8.forEach(([rn,rs],k)=>{const id="trreg"+k,ps=PREF.filter(p=>rs.includes(p.r)
 TITLES.push(["trip47","日本一周","47都道府県をすべて旅した",()=>tvN()>=47]);PROG_T.trip47=()=>[tvN(),47];HOW.trip47="47都道府県をすべて旅する";
 TITLES.push(["mame100","まめ知識博士","まめ知識を100枚集めた",()=>mmN()>=100]);PROG_T.mame100=()=>[mmN(),100];HOW.mame100="旅行先でまめ知識を集める（旅のノートで確認）";
 ENDINGS.push(["japan","日本一周エンド","47都道府県をすべて旅する",()=>tvN()>=47,"北の雪国から南の島まで、47都道府県をすべて旅しました。アルバムとノートには、日本じゅうの思い出がつまっています。"]);
+
+/* ===================== 米国の高配当株（架空）と経済ニュース ===================== */
+const FX0=150;
+const US=[
+ {id:"ushome",name:"ハッピーホーム社",desc:"洗剤やおむつなど、毎日使う生活用品の会社（米国・架空）。景気が悪くても売れやすく、配当を長く増やし続けています。",usd0:60,umu:.004,usd:.035,dy:.03,gr:.04},
+ {id:"usdrink",name:"サニードリンク社",desc:"世界中で売れている飲料の会社（米国・架空）。配当は安定していて、少しずつ増えています。",usd0:50,umu:.003,usd:.03,dy:.03,gr:.03},
+ {id:"usbell",name:"ブルーライン通信",desc:"携帯電話の会社（米国・架空）。配当は高めですが、増えることは少なく、業績しだいで減ることもあります。",usd0:25,umu:.001,usd:.045,dy:.06,gr:.01}];
+US.forEach(u=>MKT.push({id:u.id,kind:"米国株",us:1,lot:1,name:u.name,desc:u.desc,mu:0,sd:0,p0:u.usd0*FX0}));
+function usS(){const L=S.life;L.us=L.us||{fx:FX0,px:{},dps:{},news:[]};const U=L.us;US.forEach(u=>{if(U.px[u.id]==null)U.px[u.id]=u.usd0;if(U.dps[u.id]==null)U.dps[u.id]=u.usd0*u.dy;if(L.prices[u.id]==null)L.prices[u.id]=U.px[u.id]*U.fx;if(!L.hist[u.id])L.hist[u.id]=[L.prices[u.id]]});return U}
+const usd=n=>"$"+n.toFixed(2);
+/* ---- ニュース（e:値動きへの効き方、dv:配当の変化。ふだんの値動きに足すだけなので、外れる月もある） ---- */
+const NEWS=[
+ {t:"円安が進んだ",s:"米国株の円での価値↑",d:"ドルの価値が上がると、米国株を円に換えたときの金額が増えやすくなります。輸入品は値上がりしやすくなります。",e:{fx:.04}},
+ {t:"円高が進んだ",s:"米国株の円での価値↓",d:"ドルの価値が下がると、米国株を円に換えたときの金額は減りやすくなります。海外旅行や輸入品は安くなりやすいです。",e:{fx:-.04}},
+ {t:"日銀が利上げした",s:"国内債券ファンド↓・円高ぎみ",d:"金利が上がると、すでに出回っている低い金利の債券の値段は下がりやすくなります。預金の利息は増えやすくなります。",e:{bond:-.02,fx:-.02}},
+ {t:"記録的な猛暑が続いた",s:"にっぽん電力・サニードリンク社↑",d:"冷房の電気や冷たい飲み物がよく売れて、業績が上がりやすくなります。",e:{power:.04,usdrink:.03}},
+ {t:"AIブームが起きた",s:"ミライAI↑",d:"人気のテーマに関係する株は、将来への期待で大きく動きます。期待がしぼむと急に下がることもあります。",e:{ai:.1}},
+ {t:"ゲームのタネの新作が大ヒット",s:"ゲームのタネ↑",d:"ヒット作が出ると売上がのびて、株価が上がりやすくなります。",e:{game:.1}},
+ {t:"景気が悪くなる心配が広がった",s:"全世界株式・ミライAI↓、生活用品は下がりにくい",d:"不景気でも必要な物を売る会社（ディフェンシブ株）は、ほかの株より下がりにくいとされます。安全とされる債券は買われやすくなります。",e:{idx:-.04,ai:-.06,game:-.04,ushome:-.01,usdrink:-.01,bond:.01}},
+ {t:"世界的に景気がよい",s:"全世界株式↑",d:"景気がよいと会社の利益が増え、株全体が上がりやすくなります。",e:{idx:.04,ai:.03,game:.02,usbell:.01}},
+ {t:"原材料が値上がりした",s:"まるっこ食品・サニードリンク社↓",d:"材料費が上がると、値上げできるまでのあいだ利益が減りやすくなります。",e:{food:-.04,usdrink:-.03}},
+ {t:"ハッピーホーム社が増配を発表",s:"配当が3%増える",d:"配当を毎年増やし続ける「連続増配」の会社は、長く持つ人に人気があります。",e:{ushome:.02},dv:{ushome:.03},ok:U=>U.dps.ushome/U.px.ushome<.045},
+ {t:"ブルーライン通信が減配を発表",s:"配当が2割減る・株価↓",d:"配当は約束されたものではありません。利益が減ると、配当も減ることがあります。配当が高すぎる会社は、とくに注意が必要です。",e:{usbell:-.08},dv:{usbell:-.2},ok:U=>U.dps.usbell>=25*.06*.8},
+ {t:"AIへの期待がしぼんだ",s:"ミライAI↓",d:"期待で上がった株は、期待がしぼむと大きく下がることがあります。",e:{ai:-.08}},
+ {t:"ゲームのタネの新作が発売延期",s:"ゲームのタネ↓",d:"売上が入るのが先にのびると、株価は下がりやすくなります。",e:{game:-.06}},
+ {t:"サニードリンク社の新しいお茶がヒット",s:"サニードリンク社↑",d:"ヒット商品が出ると売上がのびて、株価が上がりやすくなります。",e:{usdrink:.03}},
+ {t:"甘い飲み物ばなれが進んだ",s:"サニードリンク社↓",d:"健康志向など、人々の好みが変わると売れる物も変わります。",e:{usdrink:-.04}},
+ {t:"米国の景気が好調",s:"米国株↑・円安ぎみ",d:"米国の景気がよいとドルが買われやすく、米国株も上がりやすくなります。",e:{ushome:.02,usdrink:.02,usbell:.02,fx:.02}},
+ {t:"燃料費が高くなった",s:"にっぽん電力↓",d:"電気をつくる燃料が高くなると、電力会社の利益は減りやすくなります。",e:{power:-.04}},
+ {t:"まるっこ食品の新しいお菓子がヒット",s:"まるっこ食品↑",d:"ヒット商品が出ると売上がのびて、株価が上がりやすくなります。",e:{food:.05}},
+ {t:"おだやかな月",s:"大きな動きなし",d:"大きなニュースのない月。毎月なにかが起きるわけではありません。",e:{},w:3}];
+const gaussU=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+{const _mt=monthTick;monthTick=function(r){const L=S.life;if(!L)return _mt(r);const U=usS();
+  const n=pickW(NEWS.filter(x=>!x.ok||x.ok(U)).map(x=>({...x,w:x.w||1}))),E=n.e||{};const pre={};
+  /* 日本の商品：ニュースの分だけ先に動かす（このあと、ふだんの値動きが足される） */
+  MKT.forEach(m=>{if(m.us)return;const e=E[m.id]||0;if(e)L.prices[m.id]*=Math.exp(e);pre[m.id]=L.prices[m.id]});
+  /* 為替と米国株 */
+  U.fx=Math.max(110,Math.min(180,U.fx*Math.exp(.025*gaussU()+.05*Math.log(145/U.fx)+(E.fx||0))));
+  US.forEach(u=>{U.px[u.id]=Math.max(u.usd0*.2,U.px[u.id]*Math.exp(u.umu-u.usd*u.usd/2+u.usd*gaussU()+(E[u.id]||0)));if(n.dv&&n.dv[u.id])U.dps[u.id]*=1+n.dv[u.id];L.prices[u.id]=U.px[u.id]*U.fx});
+  const out=_mt(r);
+  try{/* 急落・急騰した株には、その月のニュースの効果をつけない */
+    MKT.forEach(m=>{const e=E[m.id]||0;if(!e||!m.shock)return;const p=L.prices[m.id];if(Math.abs(Math.log(p/pre[m.id]))>.28){L.prices[m.id]=p/Math.exp(e);const h=L.hist[m.id];h[h.length-1]=L.prices[m.id]}});
+    /* 配当：3か月ごと・ドルで受け取って円に換える */
+    if(L.month%3===0){const N=nisaS();US.forEach(u=>{const h=L.hold[u.id]||0;if(!h)return;const nu=Math.min(h,N.u[u.id]||0),g=h*U.dps[u.id]/4*U.fx,gn=g*nu/h,v=gn*.9+(g-gn)*.72;
+      L.cash+=v;out.lines.push([`${u.name}の配当（ドル→円・米国10%${gn<g?"＋日本約20%":""}を引いた額）`,v]);if(!U.got){U.got=1;try{checkTitles()}catch(e){}}})}
+    if(L.month%12===0)US.forEach(u=>{if(u.gr)U.dps[u.id]*=1+u.gr});
+    U.news.unshift({m:L.month,t:n.t,s:n.s,d:n.d});U.news=U.news.slice(0,6);
+    out.ev&&out.ev.push(`📰 ${n.t}（${n.s}）`)}catch(e){console.error(e)}
+  return out}}
+/* 買ったとき：米国の高配当株はギャンブル性格を少し下げる */
+{const _t=traitFor;traitFor=function(a,k){const r=_t(a,k);if(a==="buys"&&(MKT.find(m=>m.id===k)||{}).us)gambleDown(1.5);return r}}
+/* ---- 投資の画面 ---- */
+function newsSheet(){const U=usS();openSheet("経済ニュース",U.news.length?U.news.map(n=>`<div class="newsc"><small>${monthLabel(n.m)}</small><b>${esc(n.t)}</b><span>${esc(n.s)}</span><p>${esc(n.d)}</p></div>`).join(""):`<p class="pdn">試験を受けて月が変わると、ニュースが届きます。</p>`)}
+function usDecor(){if(lifeTab!=="投資")return;const lb=document.getElementById("lbody");if(!lb||lb.querySelector(".newsbox"))return;const L=S.life,U=usS(),n=U.news[0];
+  lb.insertAdjacentHTML("afterbegin",`<button class="newsbox" id="nw-open"><span>📰 今月のニュース</span><b>${n?esc(n.t):"まだニュースはありません"}</b>${n?`<small>${esc(n.s)}</small>`:""}<i>くわしく</i></button>`);
+  document.getElementById("nw-open").onclick=newsSheet;
+  const prods=[...lb.querySelectorAll(".prod")].filter(pr=>{const b=pr.querySelector("[data-k]");return b&&US.some(u=>u.id===b.dataset.k)});
+  if(prods.length){const p0=prods[0],pv=p0.previousElementSibling,anc=pv&&pv.classList.contains("prow")?pv:p0;anc.insertAdjacentHTML("beforebegin",`<h2>米国株（高配当）</h2><div class="fxline"><span>為替</span><b>1ドル＝${U.fx.toFixed(1)}円</b><small>円安になるほど、円で見た価値が増えます</small></div><p class="pd usnote">1株から買えます。配当は3か月ごとにドルで入り、米国で10%、日本で約20%が引かれます（NISAなら米国の10%だけ）。会社はすべて架空です。</p>`);
+    prods.forEach(pr=>{const k=pr.querySelector("[data-k]").dataset.k,u=US.find(x=>x.id===k);const pg=pr.querySelector(".pgrid");if(!pg||pr.querySelector(".usinfo"))return;
+      pg.insertAdjacentHTML("afterend",`<p class="usinfo">1株 ${usd(U.px[k])}・配当 年${usd(U.dps[k])}（利回り ${(U.dps[k]/U.px[k]*100).toFixed(1)}%）${u.gr?`・毎年 約${Math.round(u.gr*100)}%増配`:""}</p>`)})}}
+{const _l=life;life=function(t,m){_l(t,m);try{usDecor()}catch(e){console.error(e)}}}
+TITLES.push(["usdiv","はじめてのドル配当","米国株の配当を受け取った",()=>!!(S.life&&S.life.us&&S.life.us.got)]);PROG_T.usdiv=()=>[S.life&&S.life.us&&S.life.us.got?1:0,1];HOW.usdiv="まち→銀行の「預金・投資」で米国株を買って、3か月待つ";
 
 S=load();S.srs=S.srs||{};Object.keys(S.streak||{}).forEach(id=>{if(+id>=10000&&!S.srs[id])S.srs[id]={b:Math.min(2,S.streak[id]),due:Date.now(),seen:Date.now()}});ensureLife();evolve();newBadges=[];save();home();
 </script>
