@@ -7111,18 +7111,19 @@ function usDecor(){if(lifeTab!=="投資")return;const lb=document.getElementById
 TITLES.push(["usdiv","はじめてのドル配当","米国株の配当を受け取った",()=>!!(S.life&&S.life.us&&S.life.us.got)]);PROG_T.usdiv=()=>[S.life&&S.life.us&&S.life.us.got?1:0,1];HOW.usdiv="まち→銀行の「預金・投資」で米国株を買って、3か月待つ";
 
 /* ===================== 投資：株数を選んで買う・買っても画面を開いたまま ===================== */
-const QTY={};
+const QTY={},QSTEP={};
 const qLot=m=>m.lot||100;
 const qPre=m=>m.us?[1,10,100]:[100,500,1000];
 const qGet=m=>QTY[m.id]||(m.us?10:100);
+const qStep=m=>QSTEP[m.id]||(m.us?10:100);
 function qSum(m){const L=S.life,n=qGet(m),amt=L.prices[m.id]*n;return `合計 <b>${YEN(amt)}</b>・買ったあとの所持金 <b class="${L.cash-amt<0?"neg":""}">${YEN(L.cash-amt)}</b>`}
 function qtyHTML(m){const n=qGet(m);return `<div class="qtyb" data-qk="${m.id}"><div class="qrow"><button class="qbtn" data-q="-">−</button><b class="qv">${n.toLocaleString("ja-JP")}株</b><button class="qbtn" data-q="+">＋</button>
-  <span class="qpre">${qPre(m).map(v=>`<button class="qp ${v===n?"on":""}" data-qp="${v}">${v.toLocaleString("ja-JP")}</button>`).join("")}</span></div><p class="qsum">${qSum(m)}</p>
+  <span class="qpre">${qPre(m).map(v=>`<button class="qp ${v===qStep(m)?"on":""}" data-qp="${v}">${v.toLocaleString("ja-JP")}</button>`).join("")}</span></div><p class="qsum">${qSum(m)}</p>
   <div class="brow"><button class="sbtn" data-qb="${m.id}">買う</button><button class="sbtn nb" data-qn="${m.id}">NISAで買う</button></div></div>`}
 function qtyDecor(){if(lifeTab!=="投資")return;const lb=document.getElementById("lbody");if(!lb)return;
   lb.querySelectorAll('.prod [data-a="buys"]').forEach(b=>{const m=MKT.find(x=>x.id===b.dataset.k);if(!m)return;const pr=b.closest(".prod"),brow=b.closest(".brow");if(pr.querySelector(".qtyb"))return;
     const nb=brow.querySelector("[data-nb]");b.remove();if(nb)nb.remove();brow.insertAdjacentHTML("beforebegin",qtyHTML(m));if(!brow.querySelector("button"))brow.remove()})}
-function qtyRefresh(root,m){root.querySelectorAll(`.qtyb[data-qk="${m.id}"]`).forEach(q=>{const n=qGet(m);q.querySelector(".qv").textContent=n.toLocaleString("ja-JP")+"株";q.querySelector(".qsum").innerHTML=qSum(m);q.querySelectorAll("[data-qp]").forEach(p=>p.classList.toggle("on",+p.dataset.qp===n))})}
+function qtyRefresh(root,m){root.querySelectorAll(`.qtyb[data-qk="${m.id}"]`).forEach(q=>{const n=qGet(m);q.querySelector(".qv").textContent=n.toLocaleString("ja-JP")+"株";q.querySelector(".qsum").innerHTML=qSum(m);q.querySelectorAll("[data-qp]").forEach(p=>p.classList.toggle("on",+p.dataset.qp===qStep(m)))})}
 function buyN(m,n,nisa){const L=S.life;if(L.welfare)return"生活保護を受けている間は投資できません。";const amt=L.prices[m.id]*n;if(L.cash<amt)return"所持金が足りません。";
   if(nisa){const o=m.lot;m.lot=n;let r;try{r=nisaBuy(m.id)}finally{m.lot=o;if(o===undefined)delete m.lot}return r}
   L.cash-=amt;L.hold[m.id]=(L.hold[m.id]||0)+n;L.cost[m.id]=(L.cost[m.id]||0)+amt;award("invest");traitFor("buys",m.id);return `${m.name}を${n.toLocaleString("ja-JP")}株（${YEN(amt)}）買いました。`}
@@ -7131,8 +7132,8 @@ let INV_RE=null;
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-q],[data-qp],[data-qb],[data-qn]");
   if(!t){const b=e.target.closest&&e.target.closest("#sheetRoot .prod button");if(b&&lifeTab==="投資"){const h=document.querySelector("#sheetRoot .shh h3");if(h)INV_RE={name:h.textContent,t:Date.now()}}return}
   const box=t.closest(".qtyb");if(!box)return;e.stopImmediatePropagation();e.preventDefault();const m=MKT.find(x=>x.id===box.dataset.qk);if(!m)return;const lot=qLot(m);
-  if(t.dataset.q){QTY[m.id]=Math.max(lot,qGet(m)+(t.dataset.q==="+"?lot:-lot));se("tap");qtyRefresh(document,m);return}
-  if(t.dataset.qp){QTY[m.id]=+t.dataset.qp;se("tap");qtyRefresh(document,m);return}
+  if(t.dataset.q){const st=qStep(m);QTY[m.id]=Math.max(st,qGet(m)+(t.dataset.q==="+"?st:-st));se("tap");qtyRefresh(document,m);return}
+  if(t.dataset.qp){QSTEP[m.id]=QTY[m.id]=+t.dataset.qp;se("tap");qtyRefresh(document,m);return}
   const msg=buyN(m,qGet(m),!!t.dataset.qn);save();const h=document.querySelector("#sheetRoot .shh h3");INV_RE=h?{name:h.textContent,t:Date.now()}:null;life(null,msg)},true);
 /* 買う・売るのあと、同じ商品の画面を開き直して結果を見せる */
 {const _l=life;life=function(t,m){_l(t,m);try{qtyDecor()}catch(e){console.error(e)}
