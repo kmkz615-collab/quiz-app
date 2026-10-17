@@ -1045,6 +1045,8 @@ dl.gl dd:last-child{border-bottom:0;padding-bottom:0}
 .pfwarn{background:#fff3e0;border:2px solid #f5a35c;border-radius:10px;padding:6px 10px;font-size:12.5px;line-height:1.5;margin:6px 0}
 .pfrows{display:flex;flex-direction:column;gap:5px}.pfr{display:grid;grid-template-columns:8px 1fr auto;gap:8px;align-items:center;text-align:left;border:2px solid var(--line);border-radius:12px;background:#fff;padding:6px 8px;font-family:inherit;color:inherit}
 .pfr>i{width:8px;height:32px;border-radius:4px}.pfn b{font-size:13px;display:block}.pfn small{font-size:10.5px;color:var(--muted)}.pfv{text-align:right}.pfv b{font-size:13.5px;display:block}.pfv small{font-size:10.5px;font-weight:700}
+.pfield .ppet.ride{width:66px;height:57px;transform:translateX(-50%);z-index:2}
+.pfield #pscore,.pfield #ptime{z-index:3}
 </style>
 
 <div id="shell">
@@ -6579,11 +6581,11 @@ function setsHTML(){const L=S.life,own=new Set(L.owned||[]),got=L.setsGot||{};
 /* ===================== あそぶ：4つの遊び ===================== */
 const PLAY_N=5;
 const GAMES=[{id:"ball",n:"ボールキャッチ",d:"落ちてくるボールをタップ",u:"個"},{id:"snack",n:"おやつキャッチ",d:"キャラを指で左右に動かして受け止める。石はよけよう",u:"個"},
- {id:"bubble",n:"シャボン玉",d:"上がっていくシャボン玉をタップ。続けて割るとコンボ",u:"点"},{id:"hide",n:"かくれんぼ",d:"隠れた場所を当てよう。5回連続で当てたらクリア",u:"回"}];
+ {id:"bubble",n:"シャボン玉",d:"上がっていくシャボン玉をタップ。続けて割るとコンボ",u:"点"},{id:"ride",n:"チャリ走",d:"タップでジャンプ（空中でもう1回できる）。石・コーン・穴をよけて、コインを集めよう",u:"点"}];
 let PG="ball";
 function plLeft(){const d=new Date().toDateString(),P=S.play=S.play&&S.play.d===d?S.play:{d,n:0};return PLAY_N-P.n}
 const plBest=()=>S.playBest=S.playBest||{};
-function plReward(id,score){const cat=typeof setOn==="function"&&setOn("cat"),base=id==="ball"?score*2+1:id==="snack"?score+1:id==="bubble"?Math.floor(score/2)+1:score*3;
+function plReward(id,score){const cat=typeof setOn==="function"&&setOn("cat"),base=id==="ball"?score*2+1:id==="snack"?score+1:id==="bubble"?Math.floor(score/2)+1:id==="ride"?Math.floor(score/25)+1:score*3;
   const up=Math.min(15,base)*(cat?2:1);S.care.mood=Math.min(100,S.care.mood+up);const B=plBest(),nb=score>(B[id]||0);if(nb)B[id]=score;
   if(score>=3)diaryNote(`${GAMES.find(g=>g.id===id).n}であそんだ`);save();return{up,nb,cat}}
 function playSheet(){if(deadNow()||S.pet.form==="egg")return;const B=plBest(),left=plLeft();
@@ -6599,7 +6601,7 @@ function playSheet(){if(deadNow()||S.pet.form==="egg")return;const B=plBest(),le
         R.querySelector("#pmsg").innerHTML=`<b>${score}${g.u}！</b> きげん +${r.up}${r.cat?"（ねこセットで2倍）":""}${r.nb?"　<b class='pnb'>自己ベスト更新！</b>":""}`;se(r.nb?"win":"buy");
         const go=R.querySelector("#pgo"),l=plLeft();go.disabled=l<=0;go.textContent=l>0?"もう一度":"今日はおしまい";R.querySelector("#pleft").textContent=l;R.querySelectorAll("[data-pg],#ppat").forEach(x=>x.disabled=false);
         const bb=R.querySelector(`[data-pg="${PG}"] small`);if(bb)bb.textContent=`ベスト ${plBest()[PG]||0}${g.u}`};
-      ({ball:plBall,snack:plSnack,bubble:plBubble,hide:plHide})[PG](pf,fin)}})}
+      ({ball:plBall,snack:plSnack,bubble:plBubble,hide:plHide,ride:plRide})[PG](pf,fin)}})}
 function plPet(pf,cls){const cv=document.createElement("canvas");cv.className="ppet "+(cls||"");pf.appendChild(cv);requestAnimationFrame(()=>drawStatic(cv,S.pet.form,false,S.life.wear));return cv}
 function plHop(cv){cv.classList.remove("hop");void cv.offsetWidth;cv.classList.add("hop")}
 function plIdle(pf){pf.querySelectorAll("canvas,.hs").forEach(x=>x.remove());plPet(pf)}
@@ -6637,6 +6639,41 @@ function plHide(pf,fin){pf.querySelectorAll("canvas,.hs").forEach(x=>x.remove())
       if(j===ans){streak++;plScore(pf,streak);se("ok");b.classList.add("ok");if(streak>=5){wrap.querySelector("p").textContent="5回連続！ クリア！";setTimeout(()=>fin(streak),900)}else setTimeout(round,800)}
       else{se("ng");b.classList.add("ng");wrap.querySelector("p").textContent=`ざんねん、${SP[ans]}のうしろでした`;setTimeout(()=>fin(streak),1100)}})};
   plScore(pf,0);round()}
+/* チャリ走：自転車で走り続けて、タップでジャンプ */
+function plRide(pf,fin){plIdle(pf);const pet=pf.querySelector(".ppet");pet.classList.add("ride");const {cv,c,W,H}=plCanvas(pf);const gy=H-40,px=Math.max(70,W*.24),ink="#3a2e2a";
+  let dist=0,coins=0,sp=190,jy=0,vy=0,air=0,obs=[],cns=[],next=W*1.7,over=0,last=performance.now(),t0=last,splash=[];pf.querySelector("#ptime").textContent="🪙 0";plScore(pf,0);
+  const jump=()=>{if(over)return;if(jy<=0){vy=560;air=1;se("tap")}else if(air===1){vy=500;air=2;se("tap")}};
+  cv.onpointerdown=e=>{e.preventDefault();jump()};
+  const spawn=()=>{const lv=Math.min(1,dist/9000),r=Math.random();let o;
+    if(r<.3)o={k:"rock",w:24,h:18};else if(r<.55)o={k:"cone",w:20,h:30};else if(r<.75)o={k:"pud",w:46,h:6};else o={k:"hole",w:52+Math.random()*30*(.5+lv),h:0};
+    o.x=next;obs.push(o);if(Math.random()<.6){const n=3+Math.floor(Math.random()*3),hi=o.k==="cone"||o.k==="hole"?70:40;for(let i=0;i<n;i++)cns.push({x:o.x-20+i*24+(o.w/2),y:gy-hi-Math.sin(i/(n-1||1)*Math.PI)*30})}
+    next+=Math.max(170,330-lv*120)+Math.random()*(260-lv*90)+(o.k==="hole"?o.w:0)};
+  const bg=(off)=>{const g=c.createLinearGradient(0,0,0,gy);g.addColorStop(0,"#bfe6ff");g.addColorStop(1,"#eef8ff");c.fillStyle=g;c.fillRect(0,0,W,gy);
+    for(let i=-1;i<6;i++){const x=((i*140-off*.1)%(W+140)+W+140)%(W+140)-70;c.fillStyle="#fff";c.beginPath();c.ellipse(x,34+(i%3)*14,22,9,0,0,6.3);c.ellipse(x+16,30+(i%3)*14,15,8,0,0,6.3);c.fill()}
+    const cols=["#c9d6e6","#d7cfe6","#e6d3c9","#cde0d0"];for(let i=-1;i<10;i++){const bw=46+(i*37%3)*10,x=((i*62-off*.3)%(W+120)+W+120)%(W+120)-60,bh=60+(i*53%5)*14;c.fillStyle=cols[(i+10)%4];c.fillRect(x,gy-bh,bw,bh);c.fillStyle="rgba(255,255,255,.65)";for(let yy=gy-bh+8;yy<gy-10;yy+=14)for(let xx=x+6;xx<x+bw-6;xx+=12)c.fillRect(xx,yy,6,7)}
+    for(let i=-1;i<8;i++){const x=((i*110-off*.6)%(W+110)+W+110)%(W+110)-55;c.fillStyle="#8a5a3c";c.fillRect(x-2,gy-22,4,22);c.fillStyle="#5fbf6a";c.beginPath();c.arc(x,gy-30,13,0,6.3);c.fill();c.lineWidth=2;c.strokeStyle=ink;c.stroke()}};
+  const ground=()=>{c.fillStyle="#9a9a9a";c.fillRect(0,gy,W,H-gy);c.fillStyle="#b0b0b0";c.fillRect(0,gy,W,5);c.strokeStyle="#f5efe2";c.lineWidth=3;c.setLineDash([16,14]);c.lineDashOffset=dist%30;c.beginPath();c.moveTo(0,gy+20);c.lineTo(W,gy+20);c.stroke();c.setLineDash([]);
+    obs.forEach(o=>{if(o.k!=="hole")return;const x=o.x-dist;c.fillStyle="#3b2f2a";c.fillRect(x,gy,o.w,H-gy);c.fillStyle="#2a211d";c.fillRect(x+4,gy+6,o.w-8,H-gy)})};
+  const drawObs=o=>{const x=o.x-dist;c.lineWidth=2.5;c.strokeStyle=ink;
+    if(o.k==="rock"){c.fillStyle="#8d8f94";c.beginPath();c.moveTo(x,gy);c.quadraticCurveTo(x+2,gy-o.h,x+o.w*.5,gy-o.h);c.quadraticCurveTo(x+o.w,gy-o.h,x+o.w,gy);c.closePath();c.fill();c.stroke()}
+    else if(o.k==="cone"){c.fillStyle="#f28c3d";c.beginPath();c.moveTo(x,gy);c.lineTo(x+o.w/2,gy-o.h);c.lineTo(x+o.w,gy);c.closePath();c.fill();c.stroke();c.fillStyle="#fff";c.fillRect(x+o.w*.3,gy-o.h*.55,o.w*.4,4)}
+    else if(o.k==="pud"){c.fillStyle="#6fb6e8";c.beginPath();c.ellipse(x+o.w/2,gy+1,o.w/2,5,0,0,6.3);c.fill();c.stroke()}};
+  const bike=(x,y,t)=>{c.lineWidth=2.5;c.strokeStyle=ink;[x-17,x+17].forEach(wx=>{c.beginPath();c.arc(wx,y-12,11,0,6.3);c.fillStyle="#fff";c.fill();c.stroke();const a=-t*sp/11;c.beginPath();c.moveTo(wx+Math.cos(a)*10,y-12+Math.sin(a)*10);c.lineTo(wx-Math.cos(a)*10,y-12-Math.sin(a)*10);c.stroke()});
+    c.strokeStyle="#e8604c";c.lineWidth=4;c.beginPath();c.moveTo(x-17,y-12);c.lineTo(x-4,y-30);c.lineTo(x+12,y-30);c.lineTo(x+17,y-12);c.moveTo(x-4,y-30);c.lineTo(x+2,y-12);c.lineTo(x-17,y-12);c.stroke();c.strokeStyle=ink;c.lineWidth=3;c.beginPath();c.moveTo(x+12,y-30);c.lineTo(x+14,y-40);c.lineTo(x+20,y-40);c.stroke()};
+  const coin=(x,y,t)=>{const s=Math.abs(Math.cos(t*4+x*.05));c.fillStyle="#f2c94c";c.beginPath();c.ellipse(x,y,8*s+1,8,0,0,6.3);c.fill();c.lineWidth=2;c.strokeStyle="#b8901e";c.stroke()};
+  const end=()=>{over=1;se("ng");pet.classList.add("ouch");cv.onpointerdown=null;setTimeout(()=>{pet.classList.remove("ouch");fin(Math.floor(dist/30)+coins*5)},900)};
+  const fr=now=>{if(!document.body.contains(pf))return;const dt=Math.min(.04,(now-last)/1000),t=(now-t0)/1000;last=now;
+    if(!over){sp=Math.min(430,190+t*7);dist+=sp*dt;while(next-dist<W+60)spawn();
+      if(jy>0||vy>0){vy-=1500*dt;jy+=vy*dt;if(jy<=0){jy=0;vy=0;air=0}}
+      const hole=obs.find(o=>o.k==="hole"&&px>o.x-dist+6&&px<o.x-dist+o.w-6);if(hole&&jy<=0){over=2;vy=0}
+      obs.forEach(o=>{if(o.k==="hole"||o.hit)return;const x=o.x-dist;if(px+20>x+3&&px-22<x+o.w-3&&jy<o.h-2){if(o.k==="pud"){o.hit=1;sp*=.8;dist-=0;splash.push({x:px,t:now});se("tap")}else{o.hit=1;end()}}});
+      cns.forEach(k=>{if(k.got)return;const x=k.x-dist;if(Math.abs(x-px)<20&&Math.abs(k.y-(gy-jy-40))<26){k.got=1;coins++;se("ok");pf.querySelector("#ptime").textContent="🪙 "+coins}});
+      obs=obs.filter(o=>o.x-dist+o.w>-20);cns=cns.filter(k=>!k.got&&k.x-dist>-20);plScore(pf,Math.floor(dist/30)+coins*5)}
+    if(over===2){jy-=260*dt*3;if(jy<-60){over=3;end()}}
+    c.clearRect(0,0,W,H);bg(dist);ground();obs.forEach(drawObs);cns.forEach(k=>coin(k.x-dist,k.y,t));
+    const by=gy-jy;bike(px,by,t);splash=splash.filter(s=>now-s.t<400);splash.forEach(s=>{const a=(now-s.t)/400;c.fillStyle=`rgba(111,182,232,${1-a})`;for(let i=0;i<5;i++){c.beginPath();c.arc(s.x-10+i*5,gy-6-a*18*(1-Math.abs(i-2)/3),3,0,6.3);c.fill()}});
+    pet.style.left=px+"px";pet.style.bottom=(H-by+26)+"px";requestAnimationFrame(fr)};
+  requestAnimationFrame(fr)}
 /* ===================== きがえ：部位タブ＋タイル ===================== */
 let WR_TAB="head",WR_SELL=false,WR_DIRTY=false;
 {const _c=closeSheet;closeSheet=function(){_c.apply(this,arguments);if(WR_DIRTY){WR_DIRTY=false;if(curTab==="room")home()}}}
@@ -6712,7 +6749,7 @@ function rpBind(cv){if(S.pet.form==="egg")return;const k=+(cv.dataset.k||1),old=
   const cv=document.getElementById("petcv");if(cv&&cv.dataset.room&&!deadNow())rpBind(cv);
   const tip=$.querySelector(".hint, .rtip");const msg=document.querySelector(".carebar")&&!S.rpTip?(S.rpTip=1,save(),true):false;if(msg)setTimeout(()=>{try{popToast("へやで遊べるよ：ボールをはじく・長押しでだっこ・家具をタップ")}catch(e){}},1200)}}
 /* あそぶ：ボールキャッチはへやのボール投げと重なるので外す */
-{const j=GAMES.findIndex(g=>g.id==="ball");if(j>=0)GAMES.splice(j,1);if(PG==="ball")PG="snack"}
+{const j=GAMES.findIndex(g=>g.id==="ball");if(j>=0)GAMES.splice(j,1);if(PG==="ball"||PG==="hide")PG="snack"}
 
 /* ===================== 家具：大きさ・置き場所・デザインの作り直し ===================== */
 /* 大きい家具（床）は奥の左右、小さめの家具（かべぎわ）は左右のすみの手前、かべの物は窓と札のあいだ、ラグは足もと */
@@ -6787,26 +6824,9 @@ drawFurn=function(cv){if(!cv)return;furnFit();const {c,W,H,dpr}=sizeCanvas(cv);c
   ["back0","back1"].forEach((s,j)=>{const id=F[s];if(id)place(id,smallX(id,j,W,sc),G.smallY,sc*.9,false)})};
 /* 動く家具（テレビ・水そう・植物・時計・夜のライト）は、へやを表示しているあいだ少しずつ描き直す */
 setInterval(()=>{try{if(document.hidden||!S||!S.life)return;const fc=document.querySelector(".scene .furncv");if(!fc)return;if(["tv","tank","plant","clock","lamp"].some(id=>hasF(id)))drawFurn(fc)}catch(e){}},250);
-/* ベッドで寝ているときは、キャラに合わせた大きさのベッドに寝かせて、ふとんをかける（奥の小さいベッドは隠す） */
-const BED_LIFT=12;
-function onBedNow(W){const b=furnX("bed");if(b==null||WK.mode!=="idle"||WK.act!=="sleep")return false;return Math.abs(WK.x-(b*W-W/2))<14}
-function petW(){const cv=document.getElementById("petcv");if(!cv)return 0;const k=+cv.dataset.k||1.5;return cv.clientWidth/k}
-/* キャラの影のかわり：寝ているときはベッド、すわっているときは影なし */
-function furnShadow(c,W,g0,px,g){if(onBedNow(W)){const R=36,bw=Math.min(R*3.4,2*Math.min(px,W-px)-4),flip=furnX("bed")>.5,top=g0-BED_LIFT,ink="#3a2e2a";c.save();c.lineJoin="round";c.lineWidth=2.5;c.strokeStyle=ink;
-    c.fillStyle="rgba(0,0,0,.13)";c.beginPath();c.ellipse(px,g0+6,bw*.55,7,0,0,6.3);c.fill();
-    const hx=flip?px+bw/2-10:px-bw/2,g=c.createLinearGradient(0,top-R*1.6,0,g0+6);g.addColorStop(0,"#c48552");g.addColorStop(1,"#8a5a3c");
-    const RR=(x,y,w,h,f,r)=>{c.beginPath();c.roundRect?c.roundRect(x,y,w,h,r):c.rect(x,y,w,h);c.fillStyle=f;c.fill();c.stroke()};
-    RR(hx,top-R*1.5,10,R*1.5+BED_LIFT+6,g,4);RR(flip?px-bw/2:px+bw/2-8,top-R*.5,8,R*.5+BED_LIFT+6,g,3);
-    RR(px-bw/2+6,top-2,bw-12,BED_LIFT+2,"#fdfdfb",4);RR(px-bw/2+6,g0-2,bw-12,8,"#8a5a3c",2);
-    c.fillStyle="#eef3f8";c.beginPath();c.ellipse(flip?px+bw/2-30:px-bw/2+30,top-6,16,7,0,0,6.3);c.fill();c.stroke();c.restore();return true}
-  return g0-g>8}
-{const _df=drawFurn;drawFurn=function(cv){const P=furnL().put;let hid=null;try{if(onBedNow(petW())){for(const s in P)if(P[s]==="bed"){hid=s;P[s]=null}}}catch(e){}try{_df(cv)}finally{if(hid)P[hid]="bed"}}}
-{const _rp=rpDraw;rpDraw=function(c,W,H,g0,now,px,g,info){_rp(c,W,H,g0,now,px,g,info);try{if(!onBedNow(W))return;
-  const R0=info.R||34,bw=R0*2.6,top=g-R0*.55,bot=g0+2;
-  c.save();c.lineWidth=2.5;c.strokeStyle="#3a2e2a";c.beginPath();c.roundRect?c.roundRect(px-bw/2,top,bw,bot-top,8):c.rect(px-bw/2,top,bw,bot-top);const gr=c.createLinearGradient(0,top,0,bot);gr.addColorStop(0,"#7fb3e8");gr.addColorStop(1,"#4b88c9");c.fillStyle=gr;c.fill();c.stroke();
-  c.fillStyle="#fff";c.beginPath();c.roundRect?c.roundRect(px-bw/2,top,bw,9,5):c.rect(px-bw/2,top,bw,9);c.fill();c.stroke();c.strokeStyle="rgba(255,255,255,.45)";c.lineWidth=1.4;for(let i=1;i<4;i++){const x=px-bw/2+bw*i/4;c.beginPath();c.moveTo(x,top+11);c.quadraticCurveTo(x+4,(top+bot)/2,x,bot-2);c.stroke()}c.restore()}catch(e){}}}
-/* 寝る・起きるで奥のベッドの表示を切り替える */
-{let was=null;setInterval(()=>{try{const fc=document.querySelector(".scene .furncv");if(!fc||!hasF("bed"))return;const on=onBedNow(petW());if(on!==was){was=on;drawFurn(fc)}}catch(e){}},300)}
+/* すわっているとき（持ち上がっているとき）は床の影を出さない */
+const BED_LIFT=0;
+function furnShadow(c,W,g0,px,g){return g0-g>8}
 
 /* ===================== 47都道府県の旅：データ ===================== */
 /* n:名前 cap:県庁所在地 r:地方 lm:写真の景色 ic:名産アイコン pl:名所 fd:名物料理 mi:おみやげ[名前,絵,f=食べ物/i=かざる] ev:[行事,月の配列,説明] mm:まめ知識 g:[列,行] */
