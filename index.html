@@ -958,6 +958,35 @@ dl.gl dd:last-child{border-bottom:0;padding-bottom:0}
 .carebar.n4{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .carebar.n5{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .carebar.n5 .cb{font-size:11px}
+/* あそぶ（4つ） */
+.pgs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pgb{font:inherit;text-align:left;background:#fff;border:2px solid var(--line);border-radius:12px;padding:6px 10px;display:flex;flex-direction:column;cursor:pointer;color:var(--ink)}
+.pgb b{font-size:13px}.pgb small{font-size:10.5px;color:var(--muted)}.pgb.on{background:#fff3c4;border-color:#f2c94c}
+.pfield .ppet{position:absolute;left:50%;bottom:6px;width:100px;height:86px;transform:translateX(-50%);pointer-events:none}
+.pfield .pball{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.ppet.hop{animation:phop .35s ease-out}.ppet.ouch{filter:grayscale(.8) brightness(.8)}
+@keyframes phop{0%{transform:translateX(-50%) translateY(0)}40%{transform:translateX(-50%) translateY(-22px)}100%{transform:translateX(-50%) translateY(0)}}
+.pnb{color:var(--mark)}
+.hs{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+.hs p{margin:0;font-weight:900;font-size:14px;background:rgba(255,255,255,.85);border-radius:10px;padding:4px 10px}
+.hsp{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.hspot{position:relative;width:76px;height:76px;border-radius:14px;border:3px solid var(--ink);background:#c9a27a;font:inherit;font-weight:900;font-size:12px;color:#fff;cursor:pointer;box-shadow:0 4px 0 var(--ink);overflow:hidden}
+.hspot span{position:relative;z-index:2;text-shadow:0 1px 0 #3a2e2a}.hspot.ok{background:#7cc47a}.hspot.ng{background:#d98a8a}
+.hpet{position:absolute;left:4px;top:4px;width:64px;height:56px;z-index:1}
+/* きがえ（タイル） */
+.wr2{display:flex;flex-direction:column;gap:10px}
+.wrtop{display:flex;gap:10px;align-items:center}
+#wrcv{width:130px;height:115px;flex:0 0 130px;background:var(--sky);border-radius:16px}
+.wrinfo{display:flex;flex-direction:column;gap:5px}.wrset{font-size:12.5px;font-weight:900;background:#fff7d6;border-radius:10px;padding:4px 10px}
+.wrmsg{font-size:12px;font-weight:700;color:var(--mark)}
+.wrgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.wrt{font:inherit;background:#fff;border:2px solid var(--line);border-radius:12px;padding:4px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;color:var(--ink);min-width:0}
+.wrt canvas{width:100%;height:64px}.wrt span{font-size:11px;font-weight:700;line-height:1.3;text-align:center}
+.wrt em{font-style:normal;font-size:10px;color:var(--muted)}
+.wrt.on{background:#fff3c4;border-color:#f2c94c;box-shadow:0 0 0 2px #f2c94c}.wrt.sell{border-color:var(--mark);border-style:dashed}.wrt.sell em{color:var(--mark);font-weight:900}
+.wrsellb{align-self:flex-end}.wrsellb.on{background:var(--mark-soft)}
+
+.pleft{margin:0;font-size:12px;text-align:right;color:var(--muted)}.pleft b{color:var(--ink);font-size:14px}
 </style>
 
 <div id="shell">
@@ -6483,11 +6512,92 @@ function setsHTML(){const L=S.life,own=new Set(L.owned||[]),got=L.setsGot||{};
   return `<div class="sets"><b>セット（${Object.keys(got).length} / ${SETS.length} そろえた）</b>${SETS.map(s=>{const on=setOn(s.id),n=s.it.filter(i=>own.has(i)).length;
    return `<div class="setc ${on?"on":""}"><div class="seth"><b>${on?"✨":""}${s.n}セット</b><small>${on?"効果が出ています":n===s.it.length?"全部持っている・身につけると効果":`持っている ${n} / ${s.it.length}`}</small></div>
     <p class="sete">${s.e}</p><div class="setit">${s.it.map(i=>`<span class="${own.has(i)?"own":""}">${own.has(i)?"✓":"・"}${itName(i)}</span>`).join("")}</div></div>`}).join("")}</div>`}
-{const _w=wearSheet;wearSheet=function(msg){_w(msg);setCheck();const box=document.querySelector("#sheetRoot .wrs");if(box&&!box.querySelector(".sets"))box.insertAdjacentHTML("beforeend",setsHTML())}}
+
 /* 名札の詳細に、いま効いているセット */
 {const _is=infoSheet;infoSheet=function(){_is();const a=setsActive(),p=document.querySelector("#sheetRoot .diarybox");if(a.length&&p&&!document.querySelector("#sheetRoot .setnow"))p.insertAdjacentHTML("beforebegin",`<div class="setnow">${a.map(s=>`<span>✨${s.n}セット：${s.e}</span>`).join("")}</div>`)}}
 /* ショップで買ったときもチェック */
 {const _l=life;life=function(t,m){_l(t,m);if(lifeTab==="おしゃれ")setTimeout(setCheck,0)}}
+
+/* ===================== あそぶ：4つの遊び ===================== */
+const PLAY_N=5;
+const GAMES=[{id:"ball",n:"ボールキャッチ",d:"落ちてくるボールをタップ",u:"個"},{id:"snack",n:"おやつキャッチ",d:"キャラを指で左右に動かして受け止める。石はよけよう",u:"個"},
+ {id:"bubble",n:"シャボン玉",d:"上がっていくシャボン玉をタップ。続けて割るとコンボ",u:"点"},{id:"hide",n:"かくれんぼ",d:"隠れた場所を当てよう。5回連続で当てたらクリア",u:"回"}];
+let PG="ball";
+function plLeft(){const d=new Date().toDateString(),P=S.play=S.play&&S.play.d===d?S.play:{d,n:0};return PLAY_N-P.n}
+const plBest=()=>S.playBest=S.playBest||{};
+function plReward(id,score){const cat=typeof setOn==="function"&&setOn("cat"),base=id==="ball"?score*2+1:id==="snack"?score+1:id==="bubble"?Math.floor(score/2)+1:score*3;
+  const up=Math.min(15,base)*(cat?2:1);S.care.mood=Math.min(100,S.care.mood+up);const B=plBest(),nb=score>(B[id]||0);if(nb)B[id]=score;
+  if(score>=3)diaryNote(`${GAMES.find(g=>g.id===id).n}であそんだ`);save();return{up,nb,cat}}
+function playSheet(){if(deadNow()||S.pet.form==="egg")return;const B=plBest(),left=plLeft();
+  openSheet("あそぶ",`<div class="play"><div class="pgs">${GAMES.map(g=>`<button class="pgb ${PG===g.id?"on":""}" data-pg="${g.id}"><b>${g.n}</b><small>ベスト ${B[g.id]||0}${g.u}</small></button>`).join("")}</div>
+   <p class="pleft">今日あと <b id="pleft">${left}</b> 回</p><p class="pdn" id="pmsg">${GAMES.find(g=>g.id===PG).d}</p>
+   <div class="pfield" id="pf"><b id="pscore">0</b><span id="ptime"></span></div>
+   <div class="rvrow"><button class="btn" id="pgo" ${left<=0?"disabled":""}>${left>0?"スタート":"今日はおしまい"}</button><button class="btn ghost" id="ppat">なでる</button></div></div>`,
+   R=>{R.querySelectorAll("[data-pg]").forEach(b=>b.onclick=()=>{if(R.dataset.run)return;PG=b.dataset.pg;playSheet()});
+    R.querySelector("#ppat").onclick=()=>{closeSheet();const b=document.getElementById("cb-pet");if(b)b.click()};
+    const pf=R.querySelector("#pf");plIdle(pf);
+    R.querySelector("#pgo").onclick=()=>{if(plLeft()<=0||R.dataset.run)return;S.play.n++;save();R.dataset.run=1;R.querySelector("#pleft").textContent=plLeft();R.querySelectorAll("#pgo,[data-pg],#ppat").forEach(x=>x.disabled=true);
+      const fin=score=>{delete R.dataset.run;if(!document.body.contains(pf))return;const r=plReward(PG,score),g=GAMES.find(x=>x.id===PG);
+        R.querySelector("#pmsg").innerHTML=`<b>${score}${g.u}！</b> きげん +${r.up}${r.cat?"（ねこセットで2倍）":""}${r.nb?"　<b class='pnb'>自己ベスト更新！</b>":""}`;se(r.nb?"win":"buy");
+        const go=R.querySelector("#pgo"),l=plLeft();go.disabled=l<=0;go.textContent=l>0?"もう一度":"今日はおしまい";R.querySelector("#pleft").textContent=l;R.querySelectorAll("[data-pg],#ppat").forEach(x=>x.disabled=false);
+        const bb=R.querySelector(`[data-pg="${PG}"] small`);if(bb)bb.textContent=`ベスト ${plBest()[PG]||0}${g.u}`};
+      ({ball:plBall,snack:plSnack,bubble:plBubble,hide:plHide})[PG](pf,fin)}})}
+function plPet(pf,cls){const cv=document.createElement("canvas");cv.className="ppet "+(cls||"");pf.appendChild(cv);requestAnimationFrame(()=>drawStatic(cv,S.pet.form,false,S.life.wear));return cv}
+function plHop(cv){cv.classList.remove("hop");void cv.offsetWidth;cv.classList.add("hop")}
+function plIdle(pf){pf.querySelectorAll("canvas,.hs").forEach(x=>x.remove());plPet(pf)}
+function plCanvas(pf){const cv=document.createElement("canvas");cv.className="pball";pf.appendChild(cv);const o=sizeCanvas(cv);o.c.setTransform(o.dpr,0,0,o.dpr,0,0);return{cv,...o}}
+function plTimer(pf,sec,tick,end){const t0=performance.now(),tm=pf.querySelector("#ptime");const fr=now=>{if(!document.body.contains(pf))return;const left=Math.max(0,sec-(now-t0)/1000);tm.textContent=left.toFixed(1);if(tick(now)===false)return;if(left>0)requestAnimationFrame(fr);else end()};requestAnimationFrame(fr)}
+const plScore=(pf,v)=>{pf.querySelector("#pscore").textContent=v};
+/* ボールキャッチ */
+function plBall(pf,fin){plIdle(pf);const pet=pf.querySelector(".ppet"),{cv,c,W,H}=plCanvas(pf);let score=0,ball;const spawn=()=>{ball={x:30+Math.random()*(W-60),y:-20,vy:1.6+score*.25+Math.random(),r:22}};spawn();
+  cv.onpointerdown=e=>{const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;if(Math.hypot(x-ball.x,y-ball.y)<ball.r+14){score++;plScore(pf,score);se("ok");plHop(pet);spawn()}};
+  plTimer(pf,10,()=>{c.clearRect(0,0,W,H);ball.y+=ball.vy;if(ball.y>H+20)spawn();c.beginPath();c.arc(ball.x,ball.y,ball.r,0,7);c.fillStyle="#f26b5b";c.fill();c.lineWidth=3;c.strokeStyle="#3a2e2a";c.stroke();c.beginPath();c.arc(ball.x-7,ball.y-7,5,0,7);c.fillStyle="#fff";c.fill()},()=>{cv.onpointerdown=null;fin(score)})}
+/* おやつキャッチ */
+function plSnack(pf,fin){plIdle(pf);const pet=pf.querySelector(".ppet"),{cv,c,W,H}=plCanvas(pf);let score=0,px=W/2,items=[],last=0;pet.classList.add("mv");
+  const setX=e=>{const r=pf.getBoundingClientRect();px=Math.max(30,Math.min(W-30,e.clientX-r.left));pet.style.left=px+"px"};pet.style.left=px+"px";
+  cv.onpointerdown=e=>{cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);setX(e)};cv.onpointermove=e=>{if(e.buttons||e.pointerType==="touch")setX(e)};
+  const draw=it=>{c.beginPath();if(it.rock){c.arc(it.x,it.y,15,0,7);c.fillStyle="#8d8f94";c.fill();c.lineWidth=3;c.strokeStyle="#3a2e2a";c.stroke();return}
+    if(it.k===0){c.moveTo(it.x,it.y-16);c.lineTo(it.x+16,it.y+12);c.lineTo(it.x-16,it.y+12);c.closePath();c.fillStyle="#fff";c.fill();c.lineWidth=3;c.strokeStyle="#3a2e2a";c.stroke();c.fillStyle="#22262b";c.fillRect(it.x-7,it.y+2,14,10)}
+    else if(it.k===1){c.arc(it.x,it.y,15,0,7);c.fillStyle="#e8a85a";c.fill();c.lineWidth=3;c.strokeStyle="#3a2e2a";c.stroke();c.beginPath();c.arc(it.x,it.y,5,0,7);c.fillStyle="#fff3e0";c.fill()}
+    else{c.arc(it.x,it.y,14,0,7);c.fillStyle="#e74c5b";c.fill();c.lineWidth=3;c.strokeStyle="#3a2e2a";c.stroke();c.fillStyle="#3f8a4c";c.fillRect(it.x-2,it.y-20,4,7)}};
+  plTimer(pf,15,now=>{if(now-last>Math.max(380,800-score*25)){last=now;items.push({x:20+Math.random()*(W-40),y:-20,vy:2+Math.random()*1.5+score*.08,rock:Math.random()<.25,k:Math.floor(Math.random()*3)})}
+    c.clearRect(0,0,W,H);const py=H-48;items.forEach(it=>{it.y+=it.vy;if(!it.done&&it.y>py-20&&it.y<py+20&&Math.abs(it.x-px)<38){it.done=1;if(it.rock){score=Math.max(0,score-2);se("ng");pet.classList.add("ouch");setTimeout(()=>pet.classList.remove("ouch"),300)}else{score++;se("ok");plHop(pet)}plScore(pf,score)}});
+    items=items.filter(it=>!it.done&&it.y<H+30);items.forEach(draw)},()=>{cv.onpointerdown=cv.onpointermove=null;fin(score)})}
+/* シャボン玉 */
+function plBubble(pf,fin){plIdle(pf);const pet=pf.querySelector(".ppet"),{cv,c,W,H}=plCanvas(pf);let score=0,combo=0,lastPop=0,bs=[],last=0,pops=[];
+  cv.onpointerdown=e=>{const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,now=performance.now();const b=bs.find(b=>Math.hypot(x-b.x,y-b.y)<b.r+8);if(!b)return;b.pop=1;
+    combo=now-lastPop<900?combo+1:1;lastPop=now;const add=1+Math.floor((combo-1)/2);score+=add;plScore(pf,score);pops.push({x:b.x,y:b.y,t:now,txt:combo>1?`${combo}コンボ +${add}`:"+1"});se("tap");if(combo%3===0)plHop(pet)};
+  plTimer(pf,15,now=>{if(now-last>520){last=now;bs.push({x:24+Math.random()*(W-48),y:H+20,r:14+Math.random()*12,vy:.9+Math.random()*1.1,ph:Math.random()*6})}
+    c.clearRect(0,0,W,H);bs.forEach(b=>{b.y-=b.vy;b.x+=Math.sin(now/400+b.ph)*.6;if(b.y<-30&&!b.pop){b.gone=1;combo=0}});bs=bs.filter(b=>!b.pop&&!b.gone);
+    bs.forEach(b=>{c.beginPath();c.arc(b.x,b.y,b.r,0,7);c.fillStyle="rgba(190,230,255,.35)";c.fill();c.lineWidth=2.5;c.strokeStyle="rgba(80,140,200,.9)";c.stroke();c.beginPath();c.arc(b.x-b.r*.35,b.y-b.r*.35,b.r*.22,0,7);c.fillStyle="rgba(255,255,255,.9)";c.fill()});
+    pops=pops.filter(p=>now-p.t<600);pops.forEach(p=>{c.globalAlpha=1-(now-p.t)/600;c.font="900 13px sans-serif";c.fillStyle="#b5651d";c.textAlign="center";c.fillText(p.txt,p.x,p.y-(now-p.t)/20);c.globalAlpha=1})},()=>{cv.onpointerdown=null;fin(score)})}
+/* かくれんぼ */
+function plHide(pf,fin){pf.querySelectorAll("canvas,.hs").forEach(x=>x.remove());const SP=["箱","植木","カーテン","ソファ","たる"];let streak=0;pf.querySelector("#ptime").textContent="";
+  const round=()=>{const n=Math.min(5,3+Math.floor(streak/2)),ans=Math.floor(Math.random()*n);pf.querySelectorAll(".hs").forEach(x=>x.remove());
+    const wrap=document.createElement("div");wrap.className="hs";wrap.innerHTML=`<p>${streak?`${streak}回連続！ `:""}どこに隠れたかな？</p><div class="hsp">${SP.slice(0,n).map((s,j)=>`<button class="hspot" data-h="${j}"><span>${s}</span></button>`).join("")}</div>`;pf.appendChild(wrap);
+    wrap.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{wrap.querySelectorAll("[data-h]").forEach(x=>x.disabled=true);const j=+b.dataset.h,cv=document.createElement("canvas");cv.className="hpet";wrap.querySelector(`[data-h="${ans}"]`).appendChild(cv);requestAnimationFrame(()=>drawStatic(cv,S.pet.form,false,S.life.wear));
+      if(j===ans){streak++;plScore(pf,streak);se("ok");b.classList.add("ok");if(streak>=5){wrap.querySelector("p").textContent="5回連続！ クリア！";setTimeout(()=>fin(streak),900)}else setTimeout(round,800)}
+      else{se("ng");b.classList.add("ng");wrap.querySelector("p").textContent=`ざんねん、${SP[ans]}のうしろでした`;setTimeout(()=>fin(streak),1100)}})};
+  plScore(pf,0);round()}
+/* ===================== きがえ：部位タブ＋タイル ===================== */
+let WR_TAB="head",WR_SELL=false,WR_DIRTY=false;
+{const _c=closeSheet;closeSheet=function(){_c.apply(this,arguments);if(WR_DIRTY){WR_DIRTY=false;if(curTab==="room")home()}}}
+function wearSheet(msg){const L=S.life;L.wear=L.wear||{};
+  openSheet("きがえ",`<div class="wr2" id="wr2"></div>`,R=>wrRender(R.querySelector("#wr2"),msg))}
+function wrRender(box,msg){const L=S.life,own=ITEMS.filter(it=>L.owned.includes(it.id)&&it.slot===WR_TAB),act=typeof setsActive==="function"?setsActive():[];
+  box.innerHTML=`<div class="wrtop"><canvas id="wrcv"></canvas><div class="wrinfo">${act.length?act.map(s=>`<span class="wrset">✨${s.n}セット発動中</span>`).join(""):`<span class="pdn">組み合わせによっては、セット効果が出ることも…？</span>`}${msg?`<span class="wrmsg">${msg}</span>`:""}</div></div>
+   <div class="seg sseg four wrtabs">${Object.entries(SLOTN).map(([k,n])=>`<button class="segb ${WR_TAB===k?"on":""}" data-wt="${k}">${n}</button>`).join("")}</div>
+   ${own.length?`<div class="wrgrid">${own.map(it=>{const on=L.wear[it.slot]===it.id;return `<button class="wrt ${on?"on":""} ${WR_SELL&&!on?"sell":""}" data-wi="${it.id}"><canvas data-wc="${it.id}"></canvas><span>${it.name}</span>${WR_SELL?(on?`<em>着ている</em>`:`<em>${YEN(Math.round(it.price*SELL_RATE))}で売る</em>`):on?`<em>着ている</em>`:""}</button>`}).join("")}</div>`
+   :`<p class="pdn" style="text-align:center;padding:16px 0">この部位の小物はまだありません。まちの「ショップ」で買えます。</p>`}
+   <button class="sbtn ghost wrsellb ${WR_SELL?"on":""}" id="wrsell">${WR_SELL?"売るのをやめる":"売る"}</button>`;
+  requestAnimationFrame(()=>{const cv=box.querySelector("#wrcv");if(cv)drawStatic(cv,S.pet.form,false,L.wear);box.querySelectorAll("[data-wc]").forEach(c=>{const it=ITEMS.find(i=>i.id===c.dataset.wc);drawStatic(c,S.pet.form,false,{[it.slot]:it.id})})});
+  box.querySelectorAll("[data-wt]").forEach(b=>b.onclick=()=>{WR_TAB=b.dataset.wt;wrRender(box)});
+  box.querySelector("#wrsell").onclick=()=>{WR_SELL=!WR_SELL;wrRender(box)};
+  box.querySelectorAll("[data-wi]").forEach(b=>b.onclick=()=>{const it=ITEMS.find(i=>i.id===b.dataset.wi),on=L.wear[it.slot]===it.id;
+    if(WR_SELL){if(on)return wrRender(box,"着ているものは売れません。先にはずしてください。");const v=Math.round(it.price*SELL_RATE);
+      openSheet("売りますか？",`<div class="bconf"><b>${esc(it.name)}</b><div class="bcrow"><span>買取価格（買った値段の30%）</span><b>${YEN(v)}</b></div><div class="rvrow"><button class="btn" id="sc-y">売る</button><button class="btn ghost" id="sc-n">やめる</button></div></div>`,
+        R=>{R.querySelector("#sc-n").onclick=()=>wearSheet();R.querySelector("#sc-y").onclick=()=>{const m=sellItem(it.id);wearSheet(m)}});return}
+    if(on)delete L.wear[it.slot];else{L.wear[it.slot]=it.id;addTrait("fashion",1)}se("tap");save();WR_DIRTY=true;if(typeof setCheck==="function")setCheck();wrRender(box)})}
 
 S=load();S.srs=S.srs||{};Object.keys(S.streak||{}).forEach(id=>{if(+id>=10000&&!S.srs[id])S.srs[id]={b:Math.min(2,S.streak[id]),due:Date.now(),seen:Date.now()}});ensureLife();evolve();newBadges=[];save();home();
 </script>
