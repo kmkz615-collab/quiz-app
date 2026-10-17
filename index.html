@@ -5608,7 +5608,7 @@ drawPet=function(cv,id,evolved){
     if(fx.eat&&!eating)fx.eat=null;if(fx.bath&&!bathing)fx.bath=null;
     const hr=new Date().getHours(),night=hr>=22||hr<6,busy=eating||bathing||fx.hearts.some(h=>now-h.t0<1500)||!!fx.say;
     let bob=0,lift=0,asleep=false;
-    if(canWalk){const R0=34;
+    if(canWalk&&RP.mode){const o=rpStep(now,dt,W,g0);bob=o.bob||0;lift=o.lift||0}else if(canWalk){const R0=34;
       if(!busy){if(WK.mode==="idle"&&now>WK.until){const pl=wkPlan(now,W,R0,night);WK.tx=Math.max(-W/2+R0,Math.min(W/2-R0,pl.tx));WK.act=pl.act;WK.stay=pl.stay;WK.mode="walk"}
         if(WK.mode==="walk"){const d=WK.tx-WK.x,sp=58*dt;if(Math.abs(d)<=sp){WK.x=WK.tx;WK.mode="idle";WK.until=now+WK.stay}else{WK.x+=Math.sign(d)*sp;bob=Math.abs(Math.sin(t*11))*4}}}
       if(WK.mode==="idle"&&now<WK.until){if(WK.act==="sit")lift=14;if(WK.act==="sleep"){asleep=true;if(furnX("bed")!=null)lift=18}}
@@ -5616,7 +5616,7 @@ drawPet=function(cv,id,evolved){
     const px=W/2+(room?WK.x:0),g=g0-bob-lift;
     ell(c,px,g0+2,58,8,"rgba(0,0,0,.14)");
     const info={blink:asleep||(!reduce&&(t%3.8)<.13),look:WK.mode==="walk"?Math.sign(WK.tx-WK.x):WK.act==="watch"?Math.sign(((furnX("tank")||.5)*W-W/2)-WK.x):Math.sin(t*.7),happy:petted||bathing||(eating&&now-fx.eat.t0>1600),eat:eating&&now-fx.eat.t0<1600,sad:C.mood<25&&!petted,dirt:bathing?0:Math.max(0,(45-C.clean)/45),wear:S.life.wear,sick:!!S.life.sick&&!bathing};
-    drawCreature(c,id,px,g,t,info);
+    drawCreature(c,id,px,g,t,info);if(room&&typeof rpDraw==="function")rpDraw(c,W,H,g0,now,px,g,info);
     if(asleep&&!eating&&!bathing){c.fillStyle="#6b7bb5";c.font='900 16px "Zen Maru Gothic",sans-serif';[0,1,2].forEach(j=>{const a=((t*.6+j/3)%1);c.globalAlpha=1-a;c.fillText("z",px+info.R*.7+a*18+j*4,g-info.R*1.8-a*30);c.globalAlpha=1})}
     if(eating){const e=(now-fx.eat.t0)/1600;if(e<1)drawFood(c,fx.eat.kind,px+info.R*1.15,info.my,Math.min(3,Math.floor(e*4)))}
     if(bathing){const e=(now-fx.bath.t0)/2800,tw=Math.min(W*.6,200),top=g-54,bot=g+8;c.globalAlpha=Math.min(1,(1-e)*4);
@@ -6598,6 +6598,66 @@ function wrRender(box,msg){const L=S.life,own=ITEMS.filter(it=>L.owned.includes(
       openSheet("売りますか？",`<div class="bconf"><b>${esc(it.name)}</b><div class="bcrow"><span>買取価格（買った値段の30%）</span><b>${YEN(v)}</b></div><div class="rvrow"><button class="btn" id="sc-y">売る</button><button class="btn ghost" id="sc-n">やめる</button></div></div>`,
         R=>{R.querySelector("#sc-n").onclick=()=>wearSheet();R.querySelector("#sc-y").onclick=()=>{const m=sellItem(it.id);wearSheet(m)}});return}
     if(on)delete L.wear[it.slot];else{L.wear[it.slot]=it.id;addTrait("fashion",1)}se("tap");save();WR_DIRTY=true;if(typeof setCheck==="function")setCheck();wrRender(box)})}
+
+/* ===================== へやで直接あそぶ：追いかけっこ・ボール投げ・だっこ・家具 ===================== */
+const RP={mode:null,tx:0,up:false,hx:0,hy:0,drop:null,ball:null,geo:null,fetch:null,pend:null,last:0,moved:0};
+const RP_CAP=15;
+function rpCap(n){const d=new Date().toDateString();S.rplay=S.rplay&&S.rplay.d===d?S.rplay:{d,g:0};const g=Math.max(0,Math.min(n,RP_CAP-S.rplay.g));S.rplay.g+=g;if(g){S.care.mood=Math.min(100,S.care.mood+g);save();try{refreshCare()}catch(e){}}return g}
+function rpHeart(x,y){fx.hearts.push({x,y,t0:performance.now()})}
+function rpSay(t){fx.say={text:t,t0:performance.now()};petKick()}
+const FURN_PLAY={tv:["テレビ、おもしろい！"],piano:["♪ポロロン♪",null],shelf:["本を読むの、たのしい"],kotatsu:["こたつ、ぬくぬく…"],lamp:["あかるいね"],plant:["いいにおい"],tank:["おさかな、かわいい","watch"],sofa:["ふかふか〜","sit"],bed:["ねむくなってきた…","sleep"]};
+/* 毎フレームの動き（drawPetから呼ばれる） */
+function rpStep(now,dt,W,g0){RP.geo={W,g0};const half=W/2-34;let bob=0,lift=0;
+  const walkTo=(ax,sp)=>{const tx=Math.max(-half,Math.min(half,ax-W/2)),d=tx-WK.x;WK.tx=tx;if(Math.abs(d)<=sp*dt){WK.x=tx;return true}WK.mode="walk";WK.x+=Math.sign(d)*sp*dt;bob=Math.abs(Math.sin(now/1000*13))*5;return false};
+  if(RP.mode==="chase"){const done=walkTo(RP.tx,120);if(done){WK.mode="idle";if(RP.up){RP.mode=null;WK.until=now+2500;if(RP.moved>60){rpHeart(W/2+WK.x,g0-70);rpCap(1)}}}}
+  else if(RP.mode==="held"){WK.x=Math.max(-half,Math.min(half,RP.hx-W/2));WK.mode="idle";lift=Math.max(0,g0-RP.hy-20);bob=Math.sin(now/90)*2}
+  else if(RP.mode==="drop"){const D=RP.drop,p=(now-D.t)/420;if(p<1)lift=D.h*(1-p)*(1-p);else if(p<1.6)lift=Math.abs(Math.sin((p-1)/.6*Math.PI))*10*(1.6-p)/.6;
+    else{RP.mode=null;WK.mode="idle";if(D.act){WK.act=D.act;WK.until=now+8000;rpSay(D.act==="sleep"?"ふかふかのベッド…":"ふかふか〜");rpCap(1)}else{WK.act=null;WK.until=now+1500;rpSay("ぽよん！")}}
+    if(D.act==="sit")lift+=14;if(D.act==="sleep")lift+=18}
+  else if(RP.mode==="fetch"){const b=RP.ball;if(RP.fetch==="go"){if(walkTo(b.x,105)){b.state="carried";RP.fetch="back";se("tap")}}
+    else if(walkTo(b.home-26,80)){b.state="rest";b.x=b.home;b.y=g0-b.r;RP.mode=null;RP.fetch=null;WK.mode="idle";WK.act=null;WK.until=now+3000;rpHeart(W/2+WK.x,g0-70);rpSay("とってきたよ！");rpCap(2)}}
+  return{bob,lift}}
+/* ボールの描画と動き */
+function rpDraw(c,W,H,g0,now,px,g,info){if(S.pet.form==="egg")return;RP.geo={W,g0};const r=11;if(!RP.ball)RP.ball={x:W-24,y:g0-r,vx:0,vy:0,r,state:"rest",home:W-24};const b=RP.ball;b.home=W-24;
+  const dt=Math.min(.05,(now-(RP.last||now))/1000);RP.last=now;
+  if(b.state==="fly"){b.vy+=1100*dt;b.x+=b.vx*dt;b.y+=b.vy*dt;const fl=g0-r;
+    if(b.y>fl){b.y=fl;b.vy*=-.5;b.vx*=.78;if(Math.abs(b.vy)<60)b.vy=0}if(b.x<r){b.x=r;b.vx=Math.abs(b.vx)*.7}if(b.x>W-r){b.x=W-r;b.vx=-Math.abs(b.vx)*.7}if(b.y<r){b.y=r;b.vy=Math.abs(b.vy)}
+    if(b.y>=fl-.5&&!b.vy){b.vx*=Math.pow(.15,dt);if(Math.abs(b.vx)<12){b.vx=0;b.state="rest";if(Math.abs(b.x-b.home)>30){RP.mode="fetch";RP.fetch="go";WK.act=null}}}}
+  else if(b.state==="carried"){const dir=WK.tx>WK.x?1:-1;b.x=px+dir*(info.R||34)*.85;b.y=g-(info.R||34)*.55}
+  else if(b.state==="drag"){}
+  c.save();c.beginPath();c.arc(b.x,b.y,r,0,7);c.fillStyle="#f26b5b";c.fill();c.lineWidth=2.5;c.strokeStyle="#3a2e2a";c.stroke();
+  c.beginPath();c.moveTo(b.x-r,b.y);c.quadraticCurveTo(b.x,b.y-5,b.x+r,b.y);c.strokeStyle="#fff";c.lineWidth=2;c.stroke();c.beginPath();c.arc(b.x-4,b.y-4,2.5,0,7);c.fillStyle="#fff";c.fill();c.restore();
+  if(b.state!=="rest"||RP.mode||RP.pend)petKick&&0;
+  if(RP.pend&&WK.mode==="idle"&&Math.abs(WK.x-WK.tx)<1.5){const F=RP.pend;RP.pend=null;rpSay(F.say);rpCap(1)}}
+function rpUseFurn(id){const fxp=furnX(id),G=RP.geo;if(fxp==null||!G)return false;const P=FURN_PLAY[id];if(!P)return false;const W=G.W;let tx=fxp*W-W/2;if(id==="tank")tx+=fxp<.5?40:-40;
+  WK.tx=Math.max(-W/2+34,Math.min(W/2-34,tx));WK.mode="walk";WK.act=P[1]||null;WK.stay=P[1]==="sleep"?9000:6000;RP.mode=null;RP.pend={say:P[0]};petKick();return true}
+function rpFurnAt(x,y){const G=RP.geo;if(!G)return null;let best=null,bd=1e9;putList().forEach(id=>{const f=furnX(id);if(f==null||!FURN_PLAY[id])return;const d=Math.abs(f*G.W-x);if(d<46&&d<bd&&y>G.g0-150){bd=d;best=id}});return best}
+/* 指の操作 */
+function rpBind(cv){if(S.pet.form==="egg")return;const k=+(cv.dataset.k||1),old={d:cv.onpointerdown,m:cv.onpointermove,u:cv.onpointerup};let st=null;
+  const pt=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)/k,(e.clientY-r.top)/k]};
+  cv.onpointerdown=e=>{const G=RP.geo;if(!G)return old.d&&old.d(e);const[x,y]=pt(e),px=G.W/2+WK.x,py=G.g0-36,b=RP.ball,now=performance.now();
+    const onPet=Math.hypot(x-px,y-py)<50,onBall=b&&b.state==="rest"&&Math.hypot(x-b.x,y-b.y)<30;
+    st={x,y,t:now,lt:now,lx:x,ly:y,vx:0,vy:0,moved:0,onPet,onBall};try{cv.setPointerCapture(e.pointerId)}catch(_){}
+    if(onBall){b.state="drag";return}
+    if(onPet){st.lp=setTimeout(()=>{if(st&&st.moved<14){st.held=1;RP.mode="held";RP.hx=st.lx;RP.hy=st.ly;RP.fetch=null;if(RP.ball.state==="carried")RP.ball.state="rest";se("tap");rpSay("わっ！");petKick()}},420);return old.d&&old.d(e)}};
+  cv.onpointermove=e=>{if(!st)return;const[x,y]=pt(e),now=performance.now(),dm=Math.hypot(x-st.lx,y-st.ly),dtm=Math.max(8,now-st.lt);st.moved+=dm;st.vx=st.vx*.4+(x-st.lx)/dtm*600;st.vy=st.vy*.4+(y-st.ly)/dtm*600;st.lx=x;st.ly=y;st.lt=now;
+    if(st.held){RP.hx=x;RP.hy=Math.min(y,RP.geo.g0);petKick();return}
+    if(st.onBall){const b=RP.ball;b.x=Math.max(b.r,Math.min(RP.geo.W-b.r,x));b.y=Math.min(y,RP.geo.g0-b.r);petKick();return}
+    if(st.onPet&&st.moved<14)return;if(st.onPet)return old.m&&old.m(e);
+    if(st.moved>14){RP.mode="chase";RP.tx=x;RP.up=false;RP.moved=(RP.moved||0)+dm;WK.act=null;petKick()}};
+  const up=e=>{if(!st)return;clearTimeout(st.lp);const s=st;st=null;const now=performance.now();
+    if(s.held){const G=RP.geo,ax=G.W/2+WK.x;let act=null;["sofa","bed"].forEach(id=>{const f=furnX(id);if(f!=null&&Math.abs(f*G.W-ax)<50){act=id==="sofa"?"sit":"sleep";WK.x=f*G.W-G.W/2}});
+      RP.drop={t:now,h:Math.max(0,G.g0-RP.hy-20),act};RP.mode="drop";petKick();return}
+    if(s.onBall){const b=RP.ball,sp=Math.hypot(s.vx,s.vy);b.state="fly";if(sp<80){b.vx=-(220+Math.random()*180);b.vy=-380}else{b.vx=Math.max(-1100,Math.min(1100,s.vx*1.2));b.vy=Math.max(-1100,Math.min(400,s.vy*1.2))-120}se("tap");petKick();return}
+    if(s.onPet)return old.u&&old.u(e);
+    if(RP.mode==="chase"){RP.up=true;return}
+    if(s.moved<14){const f=rpFurnAt(s.x,s.y);if(f){rpUseFurn(f);return}RP.mode="chase";RP.tx=s.x;RP.up=true;RP.moved=0;WK.act=null;petKick()}};
+  cv.onpointerup=up;cv.onpointercancel=up;cv.onpointerleave=e=>{if(st&&(st.held||st.onBall||RP.mode==="chase"))up(e)}}
+{const _h=home;home=function(){RP.mode=null;RP.pend=null;if(RP.ball&&RP.ball.state!=="rest"){RP.ball.state="rest";RP.ball.x=RP.ball.home;RP.ball.y=(RP.geo?RP.geo.g0:200)-RP.ball.r}RP.fetch=null;RP.moved=0;_h();
+  const cv=document.getElementById("petcv");if(cv&&cv.dataset.room&&!deadNow())rpBind(cv);
+  const tip=$.querySelector(".hint, .rtip");const msg=document.querySelector(".carebar")&&!S.rpTip?(S.rpTip=1,save(),true):false;if(msg)setTimeout(()=>{try{popToast("へやで遊べるよ：床をなぞる・ボールをはじく・長押しでだっこ・家具をタップ")}catch(e){}},1200)}}
+/* あそぶ：ボールキャッチはへやのボール投げと重なるので外す */
+{const j=GAMES.findIndex(g=>g.id==="ball");if(j>=0)GAMES.splice(j,1);if(PG==="ball")PG="snack"}
 
 S=load();S.srs=S.srs||{};Object.keys(S.streak||{}).forEach(id=>{if(+id>=10000&&!S.srs[id])S.srs[id]={b:Math.min(2,S.streak[id]),due:Date.now(),seen:Date.now()}});ensureLife();evolve();newBadges=[];save();home();
 </script>
