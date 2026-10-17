@@ -895,6 +895,57 @@ dl.gl dd:last-child{border-bottom:0;padding-bottom:0}
 .sysmx1{margin:0;font-size:12px;line-height:1.5;background:#fff3e6;border-radius:10px;padding:5px 10px}.sysmx1 b{color:#b5651d}
 .missb{font-style:normal;font-size:10.5px;font-weight:900;color:#fff;background:var(--ng);border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:2px}
 .syslink{font:inherit;font-size:12px;font-weight:700;color:var(--mark);background:none;border:0;text-decoration:underline;cursor:pointer;padding:0 2px}
+/* 購入確認・売る */
+.bconf{display:flex;flex-direction:column;gap:8px}.bconf>b{font-size:17px}
+.bcrow{display:flex;justify-content:space-between;gap:8px;font-size:14px;background:#fffaf0;border-radius:10px;padding:6px 10px}.bcrow span{color:var(--muted)}
+/* へやのボタン6つ */
+.carebar.six{grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;left:8px;right:8px}
+.carebar.six .cb{height:50px;font-size:10.5px;border-radius:14px}.carebar.six .cb small{font-size:9px}
+.carebar.six .cb svg{width:18px;height:18px}
+/* きがえ */
+.wrs{display:flex;flex-direction:column;gap:10px}
+#wrcv{width:150px;height:130px;align-self:center;background:var(--sky);border-radius:16px}
+.wrsl>b{display:block;font-size:13px;margin-bottom:4px}
+.writ{display:flex;flex-direction:column;gap:4px}
+.wri{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:5px 10px;font-size:13px}
+.wri.on{background:#fff3c4;border-color:#f2c94c}.wri div{display:flex;gap:6px}
+/* あそぶ */
+.play{display:flex;flex-direction:column;gap:8px}
+.pfield{position:relative;height:260px;border-radius:16px;background:linear-gradient(#cdeeff 0 70%,#9fd88a 70%);overflow:hidden;touch-action:none}
+.pfield #ppet{position:absolute;left:50%;bottom:6px;width:110px;height:95px;transform:translateX(-50%)}
+.pfield #pball{position:absolute;inset:0;width:100%;height:100%}
+.pfield #pscore{position:absolute;left:12px;top:8px;font-family:var(--display);font-size:28px}
+.pfield #ptime{position:absolute;right:12px;top:12px;font-weight:900}
+/* ほめる */
+.praise{margin:0 0 6px;font-size:13px;font-weight:900;color:#b5651d;background:#fff3e6;border-radius:10px;padding:5px 10px}
+/* おでかけ */
+.outs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.outc{border:3px solid var(--ink);border-radius:16px;padding:8px 10px;display:flex;flex-direction:column;gap:3px;min-height:130px}
+.outc b{font-size:15px;text-shadow:0 1px 0 #fff}.outc small{font-size:11px;line-height:1.4;background:rgba(255,255,255,.75);border-radius:8px;padding:2px 6px}
+.outc .outm{font-size:11px;font-weight:900;color:var(--mark);background:rgba(255,255,255,.85);border-radius:8px;padding:1px 6px;align-self:flex-start}
+.outc .sbtn{margin-top:auto}.outc.done{opacity:.6}
+.album{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.photo{border:3px solid #fff;outline:2px solid var(--line);border-radius:8px;display:flex;flex-direction:column;align-items:center;padding-bottom:3px}
+.photo canvas{width:100%;height:76px}.photo small{font-size:9.5px;background:rgba(255,255,255,.85);border-radius:6px;padding:0 4px}
+/* 日記 */
+.diarybox{margin-top:10px;display:flex;flex-direction:column;gap:6px}.diarybox>b{font-size:14px}
+.diary{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.diary li{background:#fffaf0;border-left:4px solid #f2c94c;border-radius:8px;padding:5px 10px;font-size:13px;line-height:1.6}
+.diary small{display:block;font-size:10.5px;color:var(--muted);font-weight:900}
+/* カジノの掛け金 */
+.betw{display:flex;flex-direction:column;gap:8px}
+.betbox{display:flex;align-items:center;gap:6px}.betbox label{flex:1;display:flex;align-items:center;gap:4px;background:#fff;border:3px solid var(--ink);border-radius:12px;padding:4px 10px}
+.betbox input{flex:1;min-width:0;border:0;font-family:var(--display);font-size:20px;text-align:right;background:transparent;width:100%}
+.betq{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.betq .sbtn{padding:6px 2px;font-size:11.5px}
+.rtypes{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.rtypes .segb{font:inherit;font-size:11px;font-weight:900;padding:5px 2px;border:2px solid var(--ink);border-radius:10px;background:#fff;display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.rtypes .segb small{font-size:9.5px;color:var(--mark)}.rtypes .segb.on{background:#f2c94c}
+.rnums{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.rn{font-family:var(--display);font-size:14px;height:34px;border-radius:8px;border:2px solid var(--ink);color:#fff;cursor:pointer}
+.rn.r{background:#c0392b}.rn.b{background:#22262b}.rn.g{background:#2f8a5b}.rn.on{outline:4px solid #f2c94c;transform:scale(1.05)}
+/* 一部売却 */
+.sellbox{display:flex;flex-direction:column;gap:6px;margin-top:6px;border-top:2px dashed #e4d8cc;padding-top:6px}.sellbox>b{font-size:12px;color:var(--muted)}
+.bld.odekake{grid-column:1/-1;background:#eaf7e4}
 </style>
 
 <div id="shell">
@@ -3892,7 +3943,7 @@ function spark(a,w,h,col){if(!a||a.length<2)return "";const mn=Math.min(...a),mx
   return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round"/><circle cx="${last[0]}" cy="${last[1]}" r="3" fill="${col}"/></svg>`}
 function toast(msg){const t=document.getElementById("ltoast");if(t){t.textContent=msg;t.hidden=false}}
 function life(tab,msg){cancelAnimationFrame(petRaf);applyDecay();if(tab)lifeTab=tab;const L=S.life,y=$.scrollTop;
-  const TABS=["家計","投資","借入","家と車","保険","おしゃれ","カジノ","資格","しごと","神社","家具","税務署","ドリーム"];if(!TABS.includes(lifeTab))lifeTab="家計";
+  const TABS=["家計","投資","借入","家と車","保険","おしゃれ","カジノ","資格","しごと","神社","家具","税務署","ドリーム","おでかけ"];if(!TABS.includes(lifeTab))lifeTab="家計";
   $.innerHTML=`<div class="strip"><span>くらし・${L.month?monthLabel(L.month):"はじまり"}</span><button class="link" id="back">もどる</button></div>
   <div class="body">
     <div class="lsum"><div><span>所持金</span><b class="${L.cash<0?"neg":""}">${YEN(L.cash)}</b></div><div><span>純資産</span><b>${YEN(nwOf(L))}</b></div></div>
@@ -6223,6 +6274,167 @@ const sysMissed=N=>POOL_HR.filter(q=>S.missed.includes(q.id)&&N.re.test(q.q+q.a)
   if(mi){const sm=sq.querySelector("small");if(sm)sm.textContent=`まちがえた${mi}問を優先して出題・通常試験として1か月すすむ`}
   sq.onclick=()=>{if(deadNow())return;S.course="hr";save();const all=POOL_HR.filter(q=>N.re.test(q.q+q.a)),miss=shuffle(all.filter(q=>S.missed.includes(q.id))),rest=shuffle(all.filter(q=>!S.missed.includes(q.id)));
     const pool=[...miss,...rest].slice(0,10);start("normal");qs=shuffle(pool).map(q=>({...q,opts:shuffle([q.a,...q.o])}));i=0;log=[];show()}}}
+
+/* ===================== 日記のメモ（その月の出来事） ===================== */
+function diaryNote(t){if(!S.life)return;const L=S.life;L.dnotes=L.dnotes||[];if(!L.dnotes.includes(t))L.dnotes.push(t);if(L.dnotes.length>8)L.dnotes.shift()}
+
+/* ===================== ① 買う前の確認 ===================== */
+let BUY_OK=false;
+function buyInfo(b){const a=b.dataset.a,x=b.dataset.x,k=b.dataset.k,L=S.life;
+  if(a==="buyi"){const it=ITEMS.find(i=>i.id===k);return it&&{n:it.name,p:it.price}}
+  if(a==="buyh"){const h=HOUSES[k];return h&&{n:h.name+"（現金で購入）",p:h.price}}
+  if(a==="loanh"){const h=HOUSES[k];return h&&{n:h.name+"（住宅ローン）",p:h.price*.1,note:`頭金 ${YEN(h.price*.1)} を払い、残りは毎月約${YEN(loanPay(h.price*.9))}の返済（35年）`}}
+  if(a==="buyc"){const c=CARS[k];return c&&{n:c.name,p:c.price,note:`買った瞬間に価値は${YEN(c.price*.85)}になります`}}
+  if(a==="rent")return{n:"賃貸アパート（敷金・礼金）",p:HOUSES.apt.init,note:`毎月の家賃 ${YEN(HOUSES.apt.rent)}`};
+  if(x==="fbuy"){const f=FURN[k];return f&&{n:f.name,p:f.price}}
+  if(x==="amu"){const m=AMU[k];return m&&{n:m.name,p:m.price}}
+  if(x==="drm"){const d=DREAM.find(z=>z[0]===k);return d&&{n:d[1],p:d[2]}}
+  return null}
+document.addEventListener("click",e=>{if(BUY_OK)return;const b=e.target.closest&&e.target.closest("button");if(!b||b.disabled)return;const info=buyInfo(b);if(!info)return;
+  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();const L=S.life,after=L.cash-info.p;
+  openSheet("本当に買いますか？",`<div class="bconf"><b>${esc(info.n)}</b><div class="bcrow"><span>価格</span><b>${YEN(info.p)}</b></div>
+   <div class="bcrow"><span>所持金</span><b>${YEN(L.cash)} → <span class="${after<0?"neg":""}">${YEN(after)}</span></b></div>${info.note?`<p class="pdn">${info.note}</p>`:""}
+   <div class="rvrow"><button class="btn" id="bc-y" ${after<0?"disabled":""}>買う</button><button class="btn ghost" id="bc-n">やめる</button></div></div>`,
+   R=>{R.querySelector("#bc-n").onclick=closeSheet;R.querySelector("#bc-y").onclick=()=>{closeSheet();BUY_OK=true;try{b.click()}finally{BUY_OK=false}diaryNote(`${info.n.replace(/（.*）/,"")}を買った`);save()}})},true);
+
+/* ===================== ② 売る（着せ替え・家具は買値の30%） ===================== */
+const SELL_RATE=.3;
+function sellItem(id){const L=S.life,it=ITEMS.find(i=>i.id===id);if(!it||!L.owned.includes(id))return"";if(Object.values(L.wear||{}).includes(id))return"身につけているものは、はずしてから売ってください。";
+  const v=Math.round(it.price*SELL_RATE);L.owned=L.owned.filter(x=>x!==id);L.cash+=v;save();return `${it.name}を${YEN(v)}で売りました。`}
+function sellFurn(id){const L=S.life,F=furnL(),f=FURN[id];if(!f||!F.own.includes(id))return"";if(hasF(id))return"置いている家具は、片づけてから売ってください。";
+  const v=Math.round(f.price*SELL_RATE);F.own=F.own.filter(x=>x!==id);L.cash+=v;save();return `${f.name}を${YEN(v)}で売りました。`}
+function confirmSell(name,v,fn){openSheet("売りますか？",`<div class="bconf"><b>${esc(name)}</b><div class="bcrow"><span>買取価格（買った値段の30%）</span><b>${YEN(v)}</b></div><div class="rvrow"><button class="btn" id="sc-y">売る</button><button class="btn ghost" id="sc-n">やめる</button></div></div>`,R=>{R.querySelector("#sc-n").onclick=closeSheet;R.querySelector("#sc-y").onclick=()=>{closeSheet();fn()}})}
+
+/* ===================== ③ きがえ（へやから） ===================== */
+function wearSheet(msg){const L=S.life;L.wear=L.wear||{};const own=ITEMS.filter(it=>L.owned.includes(it.id));
+  openSheet("きがえ",`<div class="wrs"><canvas id="wrcv"></canvas>${msg?`<p class="abmsg">${msg}</p>`:""}
+   ${own.length?Object.entries(SLOTN).map(([sl,n])=>{const its=own.filter(it=>it.slot===sl);if(!its.length)return"";
+    return `<div class="wrsl"><b>${n}</b><div class="writ">${its.map(it=>{const on=L.wear[sl]===it.id;return `<div class="wri ${on?"on":""}"><span>${it.name}</span><div><button class="sbtn ${on?"ghost":""}" data-w="${it.id}">${on?"はずす":"つける"}</button>${on?"":`<button class="sbtn ghost" data-ws2="${it.id}">売る</button>`}</div></div>`}).join("")}</div></div>`}).join("")
+   :`<p class="lead">まだ服や小物を持っていません。まちの「ショップ」で買えます。</p>`}</div>`,
+   R=>{const cv=R.querySelector("#wrcv");requestAnimationFrame(()=>drawStatic(cv,S.pet.form,false,L.wear));
+    R.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{const it=ITEMS.find(i=>i.id===b.dataset.w);if(L.wear[it.slot]===it.id){delete L.wear[it.slot]}else{L.wear[it.slot]=it.id;addTrait("fashion",1)}se("tap");save();wearSheet();if(curTab==="room")home()});
+    R.querySelectorAll("[data-ws2]").forEach(b=>b.onclick=()=>{const it=ITEMS.find(i=>i.id===b.dataset.ws2);confirmSell(it.name,Math.round(it.price*SELL_RATE),()=>{const m=sellItem(it.id);wearSheet(m)})})})}
+
+/* ===================== ⑦b あそぶ（10秒のボールキャッチ） ===================== */
+const PLAY_MAX=3;
+function playLeft(){const d=new Date().toDateString(),P=S.play=S.play&&S.play.d===d?S.play:{d,n:0};return PLAY_MAX-P.n}
+function playSheet(){if(deadNow()||S.pet.form==="egg")return;if(playLeft()<=0)return openSheet("あそぶ",`<p class="lead">今日はもうたくさん遊びました。また明日あそぼう！（1日${PLAY_MAX}回まで）</p>`);
+  openSheet("あそぶ",`<div class="play"><p class="pdn">落ちてくるボールをタップしてキャッチ！ 10秒間（今日あと${playLeft()}回）</p><div class="pfield" id="pf"><canvas id="ppet"></canvas><canvas id="pball"></canvas><b id="pscore">0</b><span id="ptime">10.0</span></div><button class="btn center" id="pgo">スタート</button></div>`,
+   R=>{const pet=R.querySelector("#ppet"),cv=R.querySelector("#pball"),go=R.querySelector("#pgo");requestAnimationFrame(()=>drawStatic(pet,S.pet.form,false,S.life.wear));
+    go.onclick=()=>{go.disabled=true;S.play.n++;save();const {c,W,H,dpr}=sizeCanvas(cv);c.setTransform(dpr,0,0,dpr,0,0);let score=0,t0=performance.now(),ball=null,run=true;
+      const spawn=()=>{ball={x:30+Math.random()*(W-60),y:-20,vy:1.6+score*.25+Math.random(),r:22}};spawn();
+      const hit=e=>{if(!run||!ball)return;const r=cv.getBoundingClientRect(),p=e.touches?e.touches[0]:e,x=p.clientX-r.left,y=p.clientY-r.top;if(Math.hypot(x-ball.x,y-ball.y)<ball.r+14){score++;se("ok");R.querySelector("#pscore").textContent=score;spawn()}};
+      cv.addEventListener("pointerdown",hit);
+      const fr=now=>{if(!document.body.contains(cv)){run=false;return}const left=Math.max(0,10-(now-t0)/1000);R.querySelector("#ptime").textContent=left.toFixed(1);
+        c.clearRect(0,0,W,H);ball.y+=ball.vy;if(ball.y>H+20)spawn();c.beginPath();c.arc(ball.x,ball.y,ball.r,0,Math.PI*2);c.fillStyle="#f26b5b";c.fill();c.lineWidth=3;c.strokeStyle="#3a2e2a";c.stroke();c.beginPath();c.arc(ball.x-7,ball.y-7,5,0,Math.PI*2);c.fillStyle="#fff";c.fill();
+        if(left>0)return requestAnimationFrame(fr);run=false;const up=Math.min(15,score*2+1);S.care.mood=Math.min(100,S.care.mood+up);if(score>=3)diaryNote("ボールあそびをした");save();
+        go.disabled=false;go.textContent=playLeft()>0?`もう一度（あと${playLeft()}回）`:"今日はおしまい";if(playLeft()<=0)go.disabled=true;
+        R.querySelector(".pdn").textContent=`${score}個キャッチ！ きげん +${up}`;se(score>=5?"win":"buy")};requestAnimationFrame(fr)}})}
+
+/* へやのボタンに「きがえ」「あそぶ」を追加 */
+{const _h=home;home=function(){_h();const bar=$.querySelector(".carebar");if(!bar||document.getElementById("cb-wear"))return;const egg=S.pet.form==="egg",D=deadNow();
+  bar.insertAdjacentHTML("beforeend",`<button class="cb" id="cb-play" ${egg||D?"disabled":""}><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="#f26b5b" stroke="#3a2e2a" stroke-width="2.5"/><circle cx="9" cy="9" r="2" fill="#fff"/></svg>あそぶ</button><button class="cb" id="cb-wear" ${D?"disabled":""}><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3l4 2 4-2 5 4-3 3-2-1v12H8V9l-2 1-3-3z" fill="#fff" stroke="#3a2e2a" stroke-width="2.2" stroke-linejoin="round"/></svg>きがえ</button>`);
+  bar.classList.add("six");document.getElementById("cb-play").onclick=playSheet;document.getElementById("cb-wear").onclick=()=>wearSheet()}}
+
+/* ===================== ⑦c ほめる：3問連続正解でよろこぶ ===================== */
+{const _a=answer;answer=function(k){_a(k);try{const l=log[log.length-1];if(mode!=="ta"&&l&&l.ok&&S.combo>0&&S.combo%3===0&&S.pet.form!=="egg"&&!deadNow()){const up=3;S.care.mood=Math.min(100,S.care.mood+up);save();
+  const a=document.getElementById("after"),s=a&&a.querySelector(".slip");if(s)s.insertAdjacentHTML("afterbegin",`<p class="praise">${S.combo}問連続正解！ ${esc(formInfo(S.pet.form).name)}がよろこんでいる（きげん +${up}）</p>`)}}catch(e){}}}
+
+/* ===================== ⑦a おでかけ ===================== */
+const OUT=[
+ {id:"park",n:"公園",p:0,m:6,d:"のんびりお散歩。無料。",bg:"linear-gradient(#bfe6ff 0 55%,#9fd88a 55%)"},
+ {id:"museum",n:"博物館",p:1500,m:8,d:"恐竜の化石や昔の道具を見学。",bg:"linear-gradient(#efe4cf 0 60%,#b99a72 60%)"},
+ {id:"zoo",n:"動物園",p:2500,m:12,d:"ゾウやキリンに会える。",bg:"linear-gradient(#cdeeff 0 55%,#c9b27d 55%)"},
+ {id:"aqua",n:"水族館",p:3000,m:14,d:"大きな水そうでイルカのショー。",bg:"linear-gradient(#5aa9e6,#1d4f91)"},
+ {id:"amuse",n:"遊園地",p:6000,m:18,d:"観覧車とジェットコースター。おなかが少しすく。",bg:"linear-gradient(#ffd7ef 0 60%,#ffe9a8 60%)",food:-10},
+ {id:"spa",n:"温泉",p:8000,m:20,d:"ゆっくりつかって、体もピカピカ。",bg:"linear-gradient(#f7e6d0 0 50%,#9ad3d8 50%)",clean:1}];
+function outBody(){const L=S.life,O=L.out||{},A=S.album||[];
+  return `<p class="lead">月に1回ずつ、いろいろな場所へおでかけできます。きげんが上がって、写真がアルバムに残ります。</p>
+  <div class="outs">${OUT.map(o=>{const done=O[o.id]===L.month;return `<div class="outc ${done?"done":""}" style="background:${o.bg}"><b>${o.n}</b><small>${o.d}</small><span class="outm">きげん +${o.m}${o.clean?"・きれい":""}</span>
+   <button class="sbtn" data-out="${o.id}" ${done||L.cash<o.p||deadNow()?"disabled":""}>${done?"今月は行った":o.p?`行く（${YEN(o.p)}）`:"行く（無料）"}</button></div>`}).join("")}</div>
+  <h2>アルバム（${A.length}枚）</h2>${A.length?`<div class="album">${A.slice(0,24).map((p,j)=>{const o=OUT.find(x=>x.id===p.p)||OUT[0];return `<div class="photo" style="background:${o.bg}"><canvas data-ph="${j}"></canvas><small>${o.n}・${monthLabel(p.m)}</small></div>`}).join("")}</div>`:`<p class="pdn">まだ写真はありません。</p>`}`}
+function goOut(id){const L=S.life,o=OUT.find(x=>x.id===id);if(!o)return"";L.out=L.out||{};if(L.out[id]===L.month)return"今月はもう行きました。";if(L.cash<o.p)return"所持金が足りません。";
+  L.cash-=o.p;L.out[id]=L.month;const C=S.care;C.mood=Math.min(100,C.mood+o.m);if(o.clean)C.clean=100;if(o.food)C.food=Math.max(0,C.food+o.food);
+  S.album=S.album||[];S.album.unshift({p:id,m:L.month,f:S.pet.form,w:JSON.parse(JSON.stringify(L.wear||{}))});S.album=S.album.slice(0,60);diaryNote(`${o.n}に行った`);cnt("outing");se("buy");save();return `${o.n}に行きました！ きげん +${o.m}。写真をアルバムに貼りました。`}
+BLD2.splice(BLD2.findIndex(b=>b.id==="casino"),0,{id:"odekake",n:"おでかけ",d:"公園・水族館・温泉など",tabs:[["おでかけ","おでかけ"]],open:()=>true,
+  ic:'<rect x="4" y="30" width="40" height="12" rx="3" fill="#9fd88a" stroke="#3a2e2a" stroke-width="3"/><circle cx="16" cy="18" r="9" fill="#5fbf6a" stroke="#3a2e2a" stroke-width="3"/><rect x="14" y="24" width="4" height="8" fill="#8a5a3c"/><circle cx="34" cy="12" r="6" fill="#f2c94c" stroke="#3a2e2a" stroke-width="3"/>'});
+{const _lb=lifeBody;lifeBody=function(){return lifeTab==="おでかけ"?outBody():_lb()}}
+
+/* ===================== ⑦f 日記 ===================== */
+{const _mt=monthTick;monthTick=function(r){const L=S.life,m0=L?L.month:1;const out=_mt(r);try{const L2=S.life,C=S.care,ns=(L2.dnotes||[]).slice(-3);L2.dnotes=[];
+  const parts=[];if(r>0)parts.push(`試験で${r}問正解した`);parts.push(...ns);
+  const mood=C.mood>=70?"毎日たのしい！":C.mood>=40?"まあまあの1か月。":"ちょっと元気がないかも…";
+  S.diary=S.diary||[];S.diary.unshift({m:m0,t:(parts.length?parts.join("。")+"。":"")+mood,f:S.pet.form});S.diary=S.diary.slice(0,36)}catch(e){}return out}}
+{const _e=evolve;evolve=function(){const b=S.pet&&S.pet.form,o=_e.apply(this,arguments);try{if(S.pet&&b&&S.pet.form!==b)diaryNote(`${formInfo(S.pet.form).name}に進化した`)}catch(e){}return o}}
+function diaryHTML(n){const D=(S.diary||[]).slice(0,n);return D.length?`<ul class="diary">${D.map(d=>`<li><small>${monthLabel(d.m)}</small><span>${esc(d.t)}</span></li>`).join("")}</ul>`:`<p class="pdn">月が変わるたびに、この子が日記を書きます。</p>`}
+{const _is=infoSheet;infoSheet=function(){_is();const p=document.querySelector("#sheetRoot .pinfo")||document.querySelector("#sheetRoot .shb");if(!p||p.querySelector(".diarybox"))return;
+  p.insertAdjacentHTML("beforeend",`<div class="diarybox"><b>日記</b>${diaryHTML(3)}${(S.diary||[]).length>3?`<button class="sbtn ghost" id="dia-all">ぜんぶ読む（${S.diary.length}）</button>`:""}</div>`);
+  const b=document.getElementById("dia-all");if(b)b.onclick=()=>openSheet("日記",diaryHTML(36))}}
+
+/* ===================== ④⑤ カジノ：掛け金を自由に・ルーレットの賭け方 ===================== */
+const RL_T={color:{n:"赤／黒",o:["赤","黒"],x:2},parity:{n:"偶数／奇数",o:["偶数","奇数"],x:2},half:{n:"前半／後半",o:["1〜18","19〜36"],x:2},dozen:{n:"12の組",o:["1〜12","13〜24","25〜36"],x:3},num:{n:"数字",o:[],x:36}};
+RL.bt=RL.bt||"color";RL.bv=RL.bv==null?"赤":RL.bv;
+function rlWins(n,bt,bv){if(bt==="num")return n===+bv;if(n===0)return false;
+  if(bt==="color")return(RED.has(n)?"赤":"黒")===bv;if(bt==="parity")return(n%2===0?"偶数":"奇数")===bv;if(bt==="half")return(n<=18?"1〜18":"19〜36")===bv;
+  if(bt==="dozen")return RL_T.dozen.o[Math.floor((n-1)/12)]===bv;return false}
+const rlLabel=()=>RL.bt==="num"?`数字の${RL.bv}`:RL.bv;
+function rlSpin2(bet){const L=S.life;if(RL.busy||!(bet>0&&bet<=L.cash))return;const bt=RL.bt,bv=RL.bv,x=RL_T[bt].x;
+  const k=Math.floor(Math.random()*37),n=WHEEL[k],col=n===0?"緑":RED.has(n)?"赤":"黒",win=rlWins(n,bt,bv)?bet*x:0,lab=rlLabel();
+  L.rl=L.rl||{bet:0,ret:0};L.cash-=bet;L.rl.bet+=bet;L.cash+=win;L.rl.ret+=win;gambleMood(win>0);L.lastBet=bet;save();
+  RL.busy=true;$.querySelectorAll("[data-rt],[data-rv],[data-ct],.betbox button,#betgo").forEach(b=>b.disabled=true);document.getElementById("rlmsg").textContent=`${lab}に${YEN(bet)}。回転中…`;
+  const a=2*Math.PI/37,want=-Math.PI/2-(k+.5)*a,r0=RL.rot,tgt=r0+Math.PI*2*5+(((want-r0)%(2*Math.PI))+2*Math.PI)%(2*Math.PI),reduce=matchMedia("(prefers-reduced-motion: reduce)").matches,dur=reduce?10:4200,t0=performance.now(),cv=document.getElementById("rlcv");
+  const fr=now=>{const p=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-p,3);RL.rot=r0+(tgt-r0)*e;if(cv&&document.body.contains(cv)){const R=Math.min(cv.clientWidth,cv.clientHeight)/2-14;drawWheel(cv,RL.rot,{ang:-Math.PI/2-(1-e)*Math.PI*14,r:R*(.95-.2*e)})}
+    if(p<1)requestAnimationFrame(fr);else{RL.busy=false;RL.hist.unshift(n);RL.hist=RL.hist.slice(0,12);
+      setTimeout(()=>life(null,`${n}（${col}）！ ${win?`${lab}が当たり！ ${YEN(win)} を獲得（${x}倍）。`:`はずれ。${YEN(bet)} を失いました。`}`),600)}};requestAnimationFrame(fr)}
+function betBoxHTML(){const L=S.life,v=Math.max(1000,Math.min(L.bet||10000,Math.max(1000,Math.floor(L.cash/1000)*1000)));L.bet=v;
+  return `<div class="betw"><div class="betbox"><button class="sbtn ghost" data-bd="-10000">−1万</button><label><input id="betin" inputmode="numeric" value="${v.toLocaleString("ja-JP")}" aria-label="掛け金"><span>円</span></label><button class="sbtn ghost" data-bd="10000">＋1万</button></div>
+   <div class="betq"><button class="sbtn ghost" data-bm="half">半分</button><button class="sbtn ghost" data-bm="x2">×2</button><button class="sbtn ghost" data-bm="last" ${L.lastBet?"":"disabled"}>前回${L.lastBet?`（${man(L.lastBet)}）`:""}</button><button class="sbtn ghost" data-bm="min">1,000円</button></div>
+   <button class="btn center" id="betgo" ${L.cash<1000?"disabled":""}>${casinoTab==="スロット"?"スロットを回す":"ルーレットを回す"}（${YEN(v)}）</button></div>`}
+function rlPickHTML(){const T=RL_T[RL.bt];
+  return `<div class="rtypes">${Object.entries(RL_T).map(([k,t])=>`<button class="segb ${RL.bt===k?"on":""}" data-rt="${k}">${t.n}<small>${t.x}倍</small></button>`).join("")}</div>
+   ${RL.bt==="num"?`<div class="rnums"><button class="rn g ${+RL.bv===0?"on":""}" data-rv="0">0</button>${Array.from({length:36},(_,j)=>j+1).map(n=>`<button class="rn ${RED.has(n)?"r":"b"} ${+RL.bv===n?"on":""}" data-rv="${n}">${n}</button>`).join("")}</div>`
+   :`<div class="brow center rpick">${T.o.map(o=>`<button class="pickb ${o==="赤"?"red":o==="黒"?"blk":""} ${RL.bv===o?"on":""}" data-rv="${o}">${o}</button>`).join("")}</div>`}
+   <p class="pdn" style="text-align:center">当たる確率 ${RL.bt==="num"?"1":RL.bt==="dozen"?"12":"18"}/37・当たったら${T.x}倍（0は「数字の0」以外すべてはずれ）</p>`}
+function casinoDecor(){if(lifeTab!=="カジノ"||!["スロット","ルーレット"].includes(casinoTab))return;const L=S.life,lb=document.getElementById("lbody");if(!lb)return;
+  const old=lb.querySelector('.brow.center [data-a="spin"],.brow.center [data-a="rspin"]');if(!old)return;old.closest(".brow").outerHTML=betBoxHTML();
+  if(casinoTab==="ルーレット"){const rp=lb.querySelector(".rpick");if(rp)rp.outerHTML=rlPickHTML();const lead=lb.querySelector(":scope > p.lead");if(lead)lead.textContent="賭け方と金額を選んで回します。0（緑）を含む37マスのヨーロピアンルーレット。";const m=document.getElementById("rlmsg");if(m)m.textContent=`${rlLabel()}に賭けます`}
+  const inp=document.getElementById("betin"),go=document.getElementById("betgo");
+  const setBet=v=>{v=Math.round(v/1000)*1000;v=Math.max(1000,Math.min(v,Math.floor(L.cash/1000)*1000||1000));L.bet=v;inp.value=v.toLocaleString("ja-JP");go.textContent=`${casinoTab==="スロット"?"スロットを回す":"ルーレットを回す"}（${YEN(v)}）`};
+  inp.onchange=()=>setBet(+inp.value.replace(/[^\d]/g,"")||1000);inp.onfocus=()=>inp.select();
+  lb.querySelectorAll("[data-bd]").forEach(b=>b.onclick=()=>setBet((L.bet||10000)+ +b.dataset.bd));
+  lb.querySelectorAll("[data-bm]").forEach(b=>b.onclick=()=>{const m=b.dataset.bm;setBet(m==="half"?L.cash/2:m==="x2"?(L.bet||10000)*2:m==="last"?L.lastBet:1000)});
+  go.onclick=()=>{setBet(+inp.value.replace(/[^\d]/g,"")||1000);const v=L.bet;if(v>L.cash)return;if(casinoTab==="スロット"){if(SL&&SL.on)return;L.lastBet=v;slotStart(String(v));$.querySelectorAll(".betbox button,.betq button,#betgo").forEach(b=>b.disabled=true)}else rlSpin2(v)};
+  lb.querySelectorAll("[data-rt]").forEach(b=>b.onclick=()=>{if(RL.busy)return;RL.bt=b.dataset.rt;RL.bv=RL.bt==="num"?"17":RL_T[RL.bt].o[0];const y=$.scrollTop;life();$.scrollTop=y});
+  lb.querySelectorAll("[data-rv]").forEach(b=>b.onclick=()=>{if(RL.busy)return;RL.bv=b.dataset.rv;lb.querySelectorAll("[data-rv]").forEach(x=>x.classList.toggle("on",x===b));const m=document.getElementById("rlmsg");if(m)m.textContent=`${rlLabel()}に賭けます`})}
+
+/* ===================== ⑥ 株・投資信託の一部売却 ===================== */
+const SELL_ACCT={};
+function sellPart(k,mode){const L=S.life,N=nisaS(),m=MKT.find(x=>x.id===k),p=L.prices[k],u=L.hold[k]||0;if(!m||!u)return"";const fund=m.kind==="投資信託";
+  const nu=Math.min(u,N.u[k]||0),tu=u-nu,acct=SELL_ACCT[k]||(tu>0?"t":"n"),avail=acct==="n"?nu:tu;if(avail<=0)return acct==="n"?"NISAで持っている分はありません。":"ふつうの口座で持っている分はありません。";
+  let x=mode==="all"?avail:mode==="half"?avail/2:fund?(+mode)/p:+mode;if(!fund){x=mode==="all"?avail:Math.floor(x/100)*100;if(x<100)x=Math.min(100,avail)}x=Math.min(x,avail);if(x<=0)return"";
+  const val=x*p;let tax=0,gain=0;
+  if(acct==="n"){const cp=(N.c[k]||0)*x/nu;gain=val-cp;N.u[k]=nu-x;N.c[k]=(N.c[k]||0)-cp;N.used=Math.max(0,N.used-cp);L.cost[k]=(L.cost[k]||0)-cp}
+  else{const tc=(L.cost[k]||0)-(N.c[k]||0),cp=tc*x/tu;gain=val-cp;tax=Math.max(0,gain)*.2;L.cost[k]=(L.cost[k]||0)-cp}
+  L.hold[k]=u-x;if(L.hold[k]<1e-9){L.hold[k]=0;L.cost[k]=0}L.cash+=val-tax;save();
+  return `${m.name}を${fund?YEN(val)+"分":x.toLocaleString("ja-JP")+"株（"+YEN(val)+"）"}売りました（${acct==="n"?"NISA":"ふつうの口座"}）。${gain>=0?`利益 ${YEN(gain)}${acct==="n"?"は税金なし":`に税金 ${YEN(tax)}`}。`:`損失 ${YEN(-gain)}（税金なし）。`}`}
+function sellDecor(){if(lifeTab!=="投資")return;const L=S.life,N=nisaS(),lb=document.getElementById("lbody");if(!lb)return;
+  lb.querySelectorAll('.prod [data-a="sell"]').forEach(sl=>{const k=sl.dataset.k,m=MKT.find(x=>x.id===k);if(!m)return;const fund=m.kind==="投資信託",u=L.hold[k]||0,nu=Math.min(u,N.u[k]||0),tu=u-nu;
+    if(!SELL_ACCT[k])SELL_ACCT[k]=tu>0?"t":"n";const ac=SELL_ACCT[k];
+    const box=document.createElement("div");box.className="sellbox";
+    box.innerHTML=`<b>売る</b>${nu>0&&tu>0?`<div class="seg sseg two"><button class="segb ${ac==="t"?"on":""}" data-sac="t">ふつうの口座から</button><button class="segb ${ac==="n"?"on":""}" data-sac="n">NISAから</button></div>`:""}
+     <div class="brow">${fund?`<button class="sbtn ghost" data-sp="10000">1万円分</button><button class="sbtn ghost" data-sp="100000">10万円分</button>`:`<button class="sbtn ghost" data-sp="100">100株</button>`}<button class="sbtn ghost" data-sp="half">半分</button><button class="sbtn ghost" data-sp="all">全部</button></div>`;
+    sl.closest(".brow").after(box);sl.remove();
+    box.querySelectorAll("[data-sac]").forEach(b=>b.onclick=()=>{SELL_ACCT[k]=b.dataset.sac;box.querySelectorAll("[data-sac]").forEach(x=>x.classList.toggle("on",x===b))});
+    box.querySelectorAll("[data-sp]").forEach(b=>b.onclick=()=>{const msg=sellPart(k,b.dataset.sp);closeSheet();life(null,msg)})})}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-sac]");if(b)b.parentNode.querySelectorAll("[data-sac]").forEach(x=>x.classList.toggle("on",x===b))});
+
+/* ===================== 画面ごとの仕上げ ===================== */
+{const _l=life;life=function(t,m){_l(t,m);try{casinoDecor()}catch(e){}try{sellDecor()}catch(e){}
+  try{if(lifeTab==="家具"){const lb=document.getElementById("lbody");lb&&lb.querySelectorAll('[data-x="fput"]').forEach(b=>{const id=b.dataset.k,f=FURN[id];if(!f||b.parentNode.querySelector("[data-sf]"))return;
+      b.insertAdjacentHTML("afterend",`<button class="sbtn ghost" data-sf="${id}">売る（${YEN(Math.round(f.price*SELL_RATE))}）</button>`);b.parentNode.querySelector("[data-sf]").onclick=()=>confirmSell(f.name,Math.round(f.price*SELL_RATE),()=>life(null,sellFurn(id)))})}}catch(e){}
+  try{if(lifeTab==="おでかけ"){const lb=document.getElementById("lbody");lb.querySelectorAll("[data-out]").forEach(b=>b.onclick=()=>{const msg=goOut(b.dataset.out);life(null,msg)});
+      lb.querySelectorAll("canvas[data-ph]").forEach(cv=>{const p=(S.album||[])[+cv.dataset.ph];if(p)drawStatic(cv,p.f,false,p.w)})}}catch(e){}
+  try{if(lifeTab==="おしゃれ"){const lb=document.getElementById("lbody");if(lb&&!lb.querySelector(".wearhint"))lb.insertAdjacentHTML("afterbegin",`<p class="pdn wearhint">持っている服の着がえ・売るのは、へやの「きがえ」からできます。</p>`)}}catch(e){}}}
 
 S=load();S.srs=S.srs||{};Object.keys(S.streak||{}).forEach(id=>{if(+id>=10000&&!S.srs[id])S.srs[id]={b:Math.min(2,S.streak[id]),due:Date.now(),seen:Date.now()}});ensureLife();evolve();newBadges=[];save();home();
 </script>
