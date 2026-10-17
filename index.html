@@ -991,7 +991,7 @@ dl.gl dd:last-child{border-bottom:0;padding-bottom:0}
 .trv{border:3px solid var(--ink);border-radius:16px;padding:10px;background:linear-gradient(135deg,#fff6dc,#e3f3ff);margin-bottom:10px}
 .trvh{display:flex;align-items:baseline;gap:8px}.trvh b{font-size:17px}.trvh small{font-size:11px;color:var(--muted);flex:1}.trvh span{font-weight:900;font-size:15px}
 .trvbar{height:8px;border-radius:6px;background:rgba(0,0,0,.08);margin:6px 0 8px;overflow:hidden}.trvbar i{display:block;height:100%;background:linear-gradient(90deg,#f2c94c,#e8604c)}
-.trvb{display:grid;grid-template-columns:1fr 1fr;gap:6px}.trvb .sbtn{margin:0;padding:8px 4px;font-size:13px}
+.trvb{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px}.trvb .sbtn{margin:0;padding:8px 4px;font-size:13px}
 .outc{position:relative;overflow:hidden}.outc>*{position:relative}.outc canvas.outbg{position:absolute;inset:0;width:100%;height:100%;z-index:0}
 .jmap{display:grid;grid-template-columns:repeat(14,1fr);grid-auto-rows:23px;gap:2px;margin:6px 0;position:relative}
 .jp{border:1.5px solid var(--rc);background:#f3f1ec;border-radius:5px;font-size:8.5px;font-weight:800;padding:0;color:#6b625c;letter-spacing:-.5px;line-height:1;white-space:nowrap;overflow:hidden;font-family:inherit}
@@ -6996,7 +6996,7 @@ function photoView(j){const ph=(S.album||[])[j];if(!ph)return;openSheet("写真"
 outBody=function(){const L=S.life,O=L.out||{},A=S.album||[],T=TV(),b=tripBlock();
   return `<div class="trv"><div class="trvh"><b>旅行</b><small>月に1回・47都道府県をめぐる</small><span>${tvN()} / 47</span></div>
    <div class="trvbar"><i style="width:${tvN()/47*100}%"></i></div>
-   <div class="trvb"><button class="sbtn" id="tv-go" ${b&&!T.cur?"disabled":""}>${T.cur?"旅のつづき":b&&T.last===L.month?"今月は旅行した":"旅に出る"}</button><button class="sbtn ghost" id="tv-note">旅のノート</button><button class="sbtn ghost" id="tv-miy">おみやげ${T.miy.length?`（${T.miy.length}）`:""}</button><button class="sbtn ghost" id="tv-rev" ${tvN()?"":"disabled"}>ご当地の復習</button></div></div>
+   <div class="trvb"><button class="sbtn" id="tv-go" ${b&&!T.cur?"disabled":""}>${T.cur?"旅のつづき":b&&T.last===L.month?"今月は旅行した":"旅に出る"}</button><button class="sbtn ghost" id="tv-note">旅のノート</button><button class="sbtn ghost" id="tv-miy">おみやげ${T.miy.length?`（${T.miy.length}）`:""}</button></div></div>
   <h2>近場のおでかけ</h2>
   <div class="outs">${OUT.map(o=>{const done=O[o.id]===L.month;return `<div class="outc ${done?"done":""}"><canvas class="outbg" data-ob="${o.id}"></canvas><b>${o.n}</b><small>${o.d}</small><span class="outm">きげん +${o.m}${o.clean?"・きれい":""}</span>
    <button class="sbtn" data-out="${o.id}" ${done||L.cash<o.p||deadNow()?"disabled":""}>${done?"今月は行った":o.p?`行く（${YEN(o.p)}）`:"行く（無料）"}</button></div>`}).join("")}</div>
@@ -7004,7 +7004,7 @@ outBody=function(){const L=S.life,O=L.out||{},A=S.album||[],T=TV(),b=tripBlock()
 {const _l=life;life=function(t,m){_l(t,m);try{if(lifeTab!=="おでかけ")return;const lb=document.getElementById("lbody");if(!lb)return;
   lb.querySelectorAll("[data-pj]").forEach(el=>{drawPhoto(el,S.album[+el.dataset.pj]);el.onclick=()=>photoView(+el.dataset.pj)});
   lb.querySelectorAll("[data-ob]").forEach(cv=>sceneDraw(cv,cv.dataset.ob,3));
-  const g=document.getElementById("tv-go");if(g)g.onclick=()=>tripSheet();const n=document.getElementById("tv-note");if(n)n.onclick=noteSheet;const mi=document.getElementById("tv-miy");if(mi)mi.onclick=miySheet;const rv=document.getElementById("tv-rev");if(rv)rv.onclick=revStart}catch(e){console.error(e)}}}
+  const g=document.getElementById("tv-go");if(g)g.onclick=()=>tripSheet();const n=document.getElementById("tv-note");if(n)n.onclick=noteSheet;const mi=document.getElementById("tv-miy");if(mi)mi.onclick=miySheet;}catch(e){console.error(e)}}}
 BLD2.forEach(b=>{if(b.id==="odekake")b.d="47都道府県の旅・公園・温泉など"});
 /* ---- 旅のノート ---- */
 function noteSheet(){const T=TV();const rows=REG8.map(([rn,rs])=>{const ps=PREF.filter(p=>rs.includes(p.r)),vn=ps.filter(p=>T.v[p.id]).length;
@@ -7028,21 +7028,6 @@ function miyEat(k){const T=TV(),m=T.miy[k],c=S.care;if(!m||m.t!=="f"||fx.eat||fx
   const c=cv.getContext("2d"),dpr=window.devicePixelRatio||1,W=cv.width/dpr,H=cv.height/dpr;c.setTransform(dpr,0,0,dpr,0,0);const x0=W*.03,y0=H*.42,w=Math.min(96,W*.26);
   c.fillStyle="#a0673f";c.strokeStyle="#3a2e2a";c.lineWidth=2.5;c.beginPath();c.roundRect?c.roundRect(x0,y0,w,7,3):c.rect(x0,y0,w,7);c.fill();c.stroke();
   c.font="22px system-ui, 'Apple Color Emoji'";c.textAlign="center";c.textBaseline="bottom";c.font="20px system-ui, 'Apple Color Emoji'";ds.forEach((m,j)=>c.fillText(m.e,x0+w*(j+.5)/3,y0+1))}catch(e){}}}
-/* ---- ご当地の復習（10問・ふつうの経験値） ---- */
-let REV=null;
-function revStart(){const T=TV(),vis=PREF.filter(p=>T.v[p.id]);if(!vis.length)return;const qs=[];
-  for(let k=0;k<10;k++){const p=pick(vis),have=T.mm[p.id]||[],kinds=["cap","food","place","miy","rev"];if(have.length)kinds.push("mm","mm");const kd=pick(kinds);qs.push(prefQ(p,kd,kd==="mm"?pick(have):null))}
-  const d=new Date().toDateString();T.rev=T.rev&&T.rev.d===d?T.rev:{d,n:0};REV={qs,i:0,ok:0,xp:T.rev.n<1,from:S.pet.form,gx:0};T.rev.n++;save();revShow()}
-function revShow(){const R0=REV,q=R0.qs[R0.i];if(!q)return revEnd();
-  openSheet("ご当地の復習",`<div class="tsh"><b>第${R0.i+1}問 / ${R0.qs.length}</b><small>${R0.xp?"正解で経験値が入ります":"経験値は1日1回目だけ"}</small></div><p class="tq">${esc(q.q)}</p><div class="topts">${q.opts.map((t,k)=>`<button class="sbtn ghost" data-ra="${k}">${esc(t)}</button>`).join("")}</div><div id="tres"></div>`,R=>{
-    R.querySelectorAll("[data-ra]").forEach(b=>b.onclick=()=>{const k=+b.dataset.ra,ok=q.opts[k]===q.a;R.querySelectorAll("[data-ra]").forEach((x,j)=>{x.disabled=true;if(q.opts[j]===q.a)x.classList.add("qok");else if(j===k)x.classList.add("qng")});
-      S.total++;S.cat["地理"]=S.cat["地理"]||[0,0];S.cat["地理"][1]++;
-      if(ok){R0.ok++;S.right++;S.cat["地理"][0]++;se("ok");if(R0.xp){applyDecay();const xg=xpGain();S.pet.xp+=xg.g;R0.gx+=xg.g;if(petCats().includes("地理"))S.pet.cat["地理"]=(S.pet.cat["地理"]||0)+1}}else se("ng");save();
-      const box=R.querySelector("#tres");box.innerHTML=`<p class="tr">${ok?"正解！":`ざんねん。正解は「${esc(q.a)}」`}</p>${q.ex?`<p class="tex">${esc(q.ex)}</p>`:""}<button class="sbtn" id="rnext">${R0.i+1<R0.qs.length?"つぎへ":"結果を見る"}</button>`;
-      R.querySelector("#rnext").onclick=()=>{R0.i++;revShow()};box.scrollIntoView({block:"nearest",behavior:"smooth"})})})}
-function revEnd(){const R0=REV;REV=null;let evo=null;if(R0.xp){const ev=evolve();if(ev.length&&S.pet.form!==R0.from)evo=[R0.from,S.pet.form]}save();
-  openSheet("ご当地の復習",`<p class="tq">${R0.qs.length}問中 <b>${R0.ok}</b>問 正解！</p><p class="tr">${R0.xp?`経験値 +${R0.gx}`:"今日の経験値はもう受け取っています（練習モード）"}</p><button class="sbtn" id="rfin">とじる</button><button class="sbtn ghost" id="ragain">もう一度</button>`,R=>{
-    R.querySelector("#rfin").onclick=()=>{closeSheet();if(evo)evoMovie(evo[0],evo[1],()=>life(null));else life(null)};R.querySelector("#ragain").onclick=()=>{if(evo){closeSheet();evoMovie(evo[0],evo[1],()=>{life(null);revStart()})}else revStart()}})}
 /* ---- 称号・エンディング ---- */
 TITLES.push(["trip1","はじめての旅","はじめて旅行に行った",()=>tvN()>=1]);PROG_T.trip1=()=>[tvN(),1];HOW.trip1="まち→おでかけ→「旅に出る」";
 REG8.forEach(([rn,rs],k)=>{const id="trreg"+k,ps=PREF.filter(p=>rs.includes(p.r));TITLES.push([id,`${rn}マスター`,`${rn}の都道府県をすべて旅した`,()=>regDone(rs)]);PROG_T[id]=()=>[ps.filter(p=>TV().v[p.id]).length,ps.length];HOW[id]=`${rn}の${ps.length}都道府県をすべて旅する`});
