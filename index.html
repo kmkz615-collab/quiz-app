@@ -946,6 +946,15 @@ dl.gl dd:last-child{border-bottom:0;padding-bottom:0}
 /* 一部売却 */
 .sellbox{display:flex;flex-direction:column;gap:6px;margin-top:6px;border-top:2px dashed #e4d8cc;padding-top:6px}.sellbox>b{font-size:12px;color:var(--muted)}
 .bld.odekake{grid-column:1/-1;background:#eaf7e4}
+/* セット */
+.sets{display:flex;flex-direction:column;gap:6px}.sets>b{font-size:13px}
+.setc{background:#fff;border:2px solid var(--line);border-radius:12px;padding:6px 10px}
+.setc.on{background:#fff7d6;border-color:#f2c94c;box-shadow:0 0 0 3px rgba(242,201,76,.35)}
+.seth{display:flex;justify-content:space-between;align-items:baseline;gap:6px}.seth b{font-size:13.5px}.seth small{font-size:10.5px;color:var(--muted)}
+.sete{margin:2px 0 4px;font-size:12px;color:var(--mark);font-weight:700}
+.setit{display:flex;flex-wrap:wrap;gap:4px}.setit span{font-size:11px;border-radius:999px;padding:1px 8px;background:#f1ece4;color:var(--muted)}
+.setit span.own{background:#e3f3ea;color:var(--ok);font-weight:700}
+.setnow{display:flex;flex-direction:column;gap:4px;margin-top:10px}.setnow span{font-size:12.5px;font-weight:700;background:#fff7d6;border-radius:10px;padding:5px 10px}
 </style>
 
 <div id="shell">
@@ -6312,7 +6321,7 @@ function wearSheet(msg){const L=S.life;L.wear=L.wear||{};const own=ITEMS.filter(
     return `<div class="wrsl"><b>${n}</b><div class="writ">${its.map(it=>{const on=L.wear[sl]===it.id;return `<div class="wri ${on?"on":""}"><span>${it.name}</span><div><button class="sbtn ${on?"ghost":""}" data-w="${it.id}">${on?"はずす":"つける"}</button>${on?"":`<button class="sbtn ghost" data-ws2="${it.id}">売る</button>`}</div></div>`}).join("")}</div></div>`}).join("")
    :`<p class="lead">まだ服や小物を持っていません。まちの「ショップ」で買えます。</p>`}</div>`,
    R=>{const cv=R.querySelector("#wrcv");requestAnimationFrame(()=>drawStatic(cv,S.pet.form,false,L.wear));
-    R.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{const it=ITEMS.find(i=>i.id===b.dataset.w);if(L.wear[it.slot]===it.id){delete L.wear[it.slot]}else{L.wear[it.slot]=it.id;addTrait("fashion",1)}se("tap");save();wearSheet();if(curTab==="room")home()});
+    R.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{const it=ITEMS.find(i=>i.id===b.dataset.w);if(L.wear[it.slot]===it.id){delete L.wear[it.slot]}else{L.wear[it.slot]=it.id;addTrait("fashion",1)}se("tap");save();if(curTab==="room")home();wearSheet()});
     R.querySelectorAll("[data-ws2]").forEach(b=>b.onclick=()=>{const it=ITEMS.find(i=>i.id===b.dataset.ws2);confirmSell(it.name,Math.round(it.price*SELL_RATE),()=>{const m=sellItem(it.id);wearSheet(m)})})})}
 
 /* ===================== ⑦b あそぶ（10秒のボールキャッチ） ===================== */
@@ -6327,9 +6336,9 @@ function playSheet(){if(deadNow()||S.pet.form==="egg")return;if(playLeft()<=0)re
       cv.addEventListener("pointerdown",hit);
       const fr=now=>{if(!document.body.contains(cv)){run=false;return}const left=Math.max(0,10-(now-t0)/1000);R.querySelector("#ptime").textContent=left.toFixed(1);
         c.clearRect(0,0,W,H);ball.y+=ball.vy;if(ball.y>H+20)spawn();c.beginPath();c.arc(ball.x,ball.y,ball.r,0,Math.PI*2);c.fillStyle="#f26b5b";c.fill();c.lineWidth=3;c.strokeStyle="#3a2e2a";c.stroke();c.beginPath();c.arc(ball.x-7,ball.y-7,5,0,Math.PI*2);c.fillStyle="#fff";c.fill();
-        if(left>0)return requestAnimationFrame(fr);run=false;const up=Math.min(15,score*2+1);S.care.mood=Math.min(100,S.care.mood+up);if(score>=3)diaryNote("ボールあそびをした");save();
+        if(left>0)return requestAnimationFrame(fr);run=false;const cat=typeof setOn==="function"&&setOn("cat"),up=Math.min(15,score*2+1)*(cat?2:1);S.care.mood=Math.min(100,S.care.mood+up);if(score>=3)diaryNote("ボールあそびをした");save();
         go.disabled=false;go.textContent=playLeft()>0?`もう一度（あと${playLeft()}回）`:"今日はおしまい";if(playLeft()<=0)go.disabled=true;
-        R.querySelector(".pdn").textContent=`${score}個キャッチ！ きげん +${up}`;se(score>=5?"win":"buy")};requestAnimationFrame(fr)}})}
+        R.querySelector(".pdn").textContent=`${score}個キャッチ！ きげん +${up}${cat?"（ねこセットで2倍）":""}`;se(score>=5?"win":"buy")};requestAnimationFrame(fr)}})}
 
 /* へやのボタンに「きがえ」「あそぶ」を追加 */
 {const _h=home;home=function(){_h();const bar=$.querySelector(".carebar");if(!bar||document.getElementById("cb-wear"))return;const egg=S.pet.form==="egg",D=deadNow();
@@ -6354,8 +6363,8 @@ function outBody(){const L=S.life,O=L.out||{},A=S.album||[];
    <button class="sbtn" data-out="${o.id}" ${done||L.cash<o.p||deadNow()?"disabled":""}>${done?"今月は行った":o.p?`行く（${YEN(o.p)}）`:"行く（無料）"}</button></div>`}).join("")}</div>
   <h2>アルバム（${A.length}枚）</h2>${A.length?`<div class="album">${A.slice(0,24).map((p,j)=>{const o=OUT.find(x=>x.id===p.p)||OUT[0];return `<div class="photo" style="background:${o.bg}"><canvas data-ph="${j}"></canvas><small>${o.n}・${monthLabel(p.m)}</small></div>`}).join("")}</div>`:`<p class="pdn">まだ写真はありません。</p>`}`}
 function goOut(id){const L=S.life,o=OUT.find(x=>x.id===id);if(!o)return"";L.out=L.out||{};if(L.out[id]===L.month)return"今月はもう行きました。";if(L.cash<o.p)return"所持金が足りません。";
-  L.cash-=o.p;L.out[id]=L.month;const C=S.care;C.mood=Math.min(100,C.mood+o.m);if(o.clean)C.clean=100;if(o.food)C.food=Math.max(0,C.food+o.food);
-  S.album=S.album||[];S.album.unshift({p:id,m:L.month,f:S.pet.form,w:JSON.parse(JSON.stringify(L.wear||{}))});S.album=S.album.slice(0,60);diaryNote(`${o.n}に行った`);cnt("outing");se("buy");save();return `${o.n}に行きました！ きげん +${o.m}。写真をアルバムに貼りました。`}
+  L.cash-=o.p;L.out[id]=L.month;const C=S.care,rs=typeof setOn==="function"&&setOn("resort"),mm=Math.round(o.m*(rs?1.5:1));C.mood=Math.min(100,C.mood+mm);if(o.clean)C.clean=100;if(o.food)C.food=Math.max(0,C.food+o.food);
+  S.album=S.album||[];S.album.unshift({p:id,m:L.month,f:S.pet.form,w:JSON.parse(JSON.stringify(L.wear||{}))});S.album=S.album.slice(0,60);diaryNote(`${o.n}に行った`);cnt("outing");se("buy");save();return `${o.n}に行きました！ きげん +${mm}${rs?"（南国バカンスセットで1.5倍）":""}。写真をアルバムに貼りました。`}
 BLD2.splice(BLD2.findIndex(b=>b.id==="casino"),0,{id:"odekake",n:"おでかけ",d:"公園・水族館・温泉など",tabs:[["おでかけ","おでかけ"]],open:()=>true,
   ic:'<rect x="4" y="30" width="40" height="12" rx="3" fill="#9fd88a" stroke="#3a2e2a" stroke-width="3"/><circle cx="16" cy="18" r="9" fill="#5fbf6a" stroke="#3a2e2a" stroke-width="3"/><rect x="14" y="24" width="4" height="8" fill="#8a5a3c"/><circle cx="34" cy="12" r="6" fill="#f2c94c" stroke="#3a2e2a" stroke-width="3"/>'});
 {const _lb=lifeBody;lifeBody=function(){return lifeTab==="おでかけ"?outBody():_lb()}}
@@ -6435,6 +6444,45 @@ document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest
   try{if(lifeTab==="おでかけ"){const lb=document.getElementById("lbody");lb.querySelectorAll("[data-out]").forEach(b=>b.onclick=()=>{const msg=goOut(b.dataset.out);life(null,msg)});
       lb.querySelectorAll("canvas[data-ph]").forEach(cv=>{const p=(S.album||[])[+cv.dataset.ph];if(p)drawStatic(cv,p.f,false,p.w)})}}catch(e){}
   try{if(lifeTab==="おしゃれ"){const lb=document.getElementById("lbody");if(lb&&!lb.querySelector(".wearhint"))lb.insertAdjacentHTML("afterbegin",`<p class="pdn wearhint">持っている服の着がえ・売るのは、へやの「きがえ」からできます。</p>`)}}catch(e){}}}
+
+/* ===================== 小物のセット効果 ===================== */
+const SETS=[
+ {id:"witch",n:"魔法使い",it:["witch","starg","wand"],e:"毎月きげん+6",mood:6},
+ {id:"gent",n:"紳士",it:["silk","monocle","bowtie"],e:"お給料（正解1問あたり）+3%"},
+ {id:"king",n:"王さま",it:["crown","gold","goldbar"],e:"毎月きげん+10・セレブ度アップ",mood:10},
+ {id:"resort",n:"南国バカンス",it:["straw","sun","lei"],e:"おでかけで上がるきげんが1.5倍"},
+ {id:"flower",n:"お花畑",it:["flower","sticker","bouquet"],e:"きげんが下がりにくい"},
+ {id:"cat",n:"ねこ",it:["nekomimi","mustache","bell"],e:"「あそぶ」で上がるきげんが2倍"},
+ {id:"sport",n:"スポーツ",it:["cap","goggles","flag"],e:"病気になりにくい"},
+ {id:"winter",n:"冬じたく",it:["knit","scarf","umbrella"],e:"冬（12〜2月）は毎月きげん+8"},
+ {id:"biz",n:"ビジネス",it:["round","tie"],e:"仕事のストレスで下がるきげんを毎月2まで打ち消す"},
+ {id:"angel",n:"天使",it:["halo","pearl","balloon"],e:"毎月きげん+8・病院代 −20%",mood:8}];
+const itName=id=>(ITEMS.find(i=>i.id===id)||{}).name||id;
+function setOn(id){const s=SETS.find(x=>x.id===id),w=S.life&&S.life.wear;if(!s||!w)return false;const v=Object.values(w);return s.it.every(i=>v.includes(i))}
+const setsActive=()=>SETS.filter(s=>setOn(s.id));
+/* そろった瞬間のお知らせと記録 */
+function setCheck(){if(!S.life)return;const L=S.life;L.setsGot=L.setsGot||{};const fresh=[];setsActive().forEach(s=>{if(!L.setsGot[s.id]){L.setsGot[s.id]=L.month;fresh.push(s.n)}});
+  if(fresh.length){popToast(`✨${fresh.join("・")}セット完成！`);se("title");diaryNote(`${fresh[0]}セットがそろった`);save();try{checkTitles()}catch(e){}}}
+TITLES.push(["coord","コーディネーター","小物のセットを3つそろえた",()=>Object.keys((S.life&&S.life.setsGot)||{}).length>=3]);
+PROG_T.coord=()=>[Object.keys((S.life&&S.life.setsGot)||{}).length,3];HOW.coord="へやの「きがえ」で、同じセットの小物を全部身につける";
+/* 効果 */
+{const _sp=salPer;salPer=function(){const v=_sp();return setOn("gent")?Math.round(v*1.03):v}}
+{const _d=decayBy;decayBy=function(f,cl,mo){return _d(f,cl,setOn("flower")?mo*.6:mo)}}
+{const _sr=sickRisk;sickRisk=function(){return Math.max(.01,_sr()-(setOn("sport")?.02:0))}}
+{const _h=goHospital;goHospital=function(){const L=S.life,c0=L.cash,m=_h(),paid=c0-L.cash;if(paid>0&&setOn("angel")){const back=Math.round(paid*.2);L.cash+=back;return m+`（天使セットで ${YEN(back)} 安くなった）`}return m}}
+{const _mt=monthTick;monthTick=function(r){const out=_mt(r);try{const C=S.care;let m=0;const why=[];
+  setsActive().forEach(s=>{if(s.mood){m+=s.mood;why.push(s.n)}if(s.id==="king")addTrait("celeb",2);if(s.id==="winter"&&seasonNow()==="winter"){m+=8;why.push(s.n)}if(s.id==="biz"&&jobNow().stress<0){m+=Math.min(2,-jobNow().stress);why.push(s.n)}});
+  if(m){C.mood=Math.min(100,C.mood+m);out.ev&&out.ev.push(`セット効果（${why.join("・")}）できげん+${m}`)}}catch(e){}return out}}
+/* きがえにセット一覧 */
+function setsHTML(){const L=S.life,own=new Set(L.owned||[]),got=L.setsGot||{};
+  return `<div class="sets"><b>セット（${Object.keys(got).length} / ${SETS.length} そろえた）</b>${SETS.map(s=>{const on=setOn(s.id),n=s.it.filter(i=>own.has(i)).length;
+   return `<div class="setc ${on?"on":""}"><div class="seth"><b>${on?"✨":""}${s.n}セット</b><small>${on?"効果が出ています":n===s.it.length?"全部持っている・身につけると効果":`持っている ${n} / ${s.it.length}`}</small></div>
+    <p class="sete">${s.e}</p><div class="setit">${s.it.map(i=>`<span class="${own.has(i)?"own":""}">${own.has(i)?"✓":"・"}${itName(i)}</span>`).join("")}</div></div>`}).join("")}</div>`}
+{const _w=wearSheet;wearSheet=function(msg){_w(msg);setCheck();const box=document.querySelector("#sheetRoot .wrs");if(box&&!box.querySelector(".sets"))box.insertAdjacentHTML("beforeend",setsHTML())}}
+/* 名札の詳細に、いま効いているセット */
+{const _is=infoSheet;infoSheet=function(){_is();const a=setsActive(),p=document.querySelector("#sheetRoot .diarybox");if(a.length&&p&&!document.querySelector("#sheetRoot .setnow"))p.insertAdjacentHTML("beforebegin",`<div class="setnow">${a.map(s=>`<span>✨${s.n}セット：${s.e}</span>`).join("")}</div>`)}}
+/* ショップで買ったときもチェック */
+{const _l=life;life=function(t,m){_l(t,m);if(lifeTab==="おしゃれ")setTimeout(setCheck,0)}}
 
 S=load();S.srs=S.srs||{};Object.keys(S.streak||{}).forEach(id=>{if(+id>=10000&&!S.srs[id])S.srs[id]={b:Math.min(2,S.streak[id]),due:Date.now(),seen:Date.now()}});ensureLife();evolve();newBadges=[];save();home();
 </script>
